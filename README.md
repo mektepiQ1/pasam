@@ -1,2 +1,0 @@
-# pasam
-pasamdoner.github.io
