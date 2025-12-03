@@ -1,0 +1,3212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Kar/Zarar Analiz Sistemi - Profesyonel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.1/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --primary-light: #34495e;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #17a2b8;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --border-radius: 12px;
+            --shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 30px 35px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+        
+        .header-content {
+            flex: 1;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+        
+        .time-period-selector {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 5px;
+            margin-top: 20px;
+            width: fit-content;
+        }
+        
+        .time-period-btn {
+            padding: 10px 25px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .time-period-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .time-period-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            min-width: 500px;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .stat-trend {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .trend-up {
+            color: var(--success);
+        }
+        
+        .trend-down {
+            color: var(--danger);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+        
+        .profit-positive {
+            color: var(--success);
+        }
+        
+        .profit-negative {
+            color: var(--danger);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2.5fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1400px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .products-section {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-header {
+            background: linear-gradient(to right, var(--secondary), #2980b9);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1a252f;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #219653;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d68910;
+        }
+        
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .products-container {
+            padding: 0;
+            overflow-x: auto;
+            flex: 1;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+        
+        .products-table thead {
+            background: var(--light);
+        }
+        
+        .products-table th {
+            padding: 20px 18px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 3px solid #ddd;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .products-table td {
+            padding: 18px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .product-row:hover {
+            background-color: #f8fafc;
+        }
+        
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .product-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .product-name {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.05rem;
+        }
+        
+        .product-category {
+            font-size: 0.85rem;
+            color: var(--gray);
+            background: #f0f4f8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-top: 5px;
+            display: inline-block;
+            font-weight: 500;
+        }
+        
+        .input-group {
+            margin-bottom: 8px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: white;
+            font-weight: 500;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+        }
+        
+        .profit-display {
+            font-weight: 800;
+            font-size: 1.05rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 100px;
+        }
+        
+        .profit-positive {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+        }
+        
+        .profit-negative {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+        
+        .analysis-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .analysis-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            height: 100%;
+        }
+        
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .analysis-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-stat {
+            padding: 22px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-left: 5px solid var(--secondary);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .summary-stat h4 {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .profit-breakdown {
+            margin-top: 25px;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .breakdown-label {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+        
+        .breakdown-value {
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+        
+        .chart-container {
+            height: 280px;
+            margin-top: 25px;
+        }
+        
+        .dashboard-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .dashboard-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .performance-meter {
+            width: 100%;
+            height: 24px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 25px 0;
+            position: relative;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 1s ease;
+        }
+        
+        .performance-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 20px 30px;
+            border-radius: var(--border-radius);
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--transition);
+            z-index: 1000;
+            max-width: 450px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, var(--success), #2ecc71);
+            color: white;
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger), #c0392b);
+            color: white;
+        }
+        
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning), #f1c40f);
+            color: white;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--gray);
+            font-size: 0.95rem;
+            border-top: 2px solid #e0e0e0;
+            margin-top: 50px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        @media (max-width: 1200px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 25px;
+            }
+            
+            .header-stats {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .section-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+                padding: 15px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f4f8;
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .action-btn:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .action-btn-danger {
+            background: #ffeaea;
+            color: var(--danger);
+        }
+        
+        .action-btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .zarar-analysis {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #fff5f5, #ffeaea);
+            border-left: 5px solid var(--danger);
+            box-shadow: 0 4px 6px rgba(231, 76, 60, 0.1);
+        }
+        
+        .zarar-analysis h4 {
+            color: var(--danger);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+        }
+        
+        .zarar-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ffeaea;
+        }
+        
+        .zarar-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .zarar-value {
+            font-weight: 800;
+            color: var(--danger);
+        }
+        
+        .other-expenses {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .expenses-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .expenses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .modal-title {
+            font-size: 1.6rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-modal:hover {
+            background: #f0f0f0;
+            color: var(--danger);
+        }
+        
+        .modal-body {
+            margin-bottom: 25px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+        
+        .data-status {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        
+        /* Zaman Periyodu Kartları */
+        .time-period-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .period-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        
+        .period-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .period-card.active {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        }
+        
+        .period-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto 20px;
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .period-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .period-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .period-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .change-positive {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+        }
+        
+        .change-negative {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+        
+        /* Karşılaştırma Grafiği */
+        .comparison-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        .comparison-chart {
+            height: 350px;
+            margin-top: 20px;
+        }
+        
+        /* Detaylı Rapor Bölümü */
+        .detailed-report {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .report-card {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid var(--info);
+        }
+        
+        .report-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .report-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .report-desc {
+            font-size: 0.9rem;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stat-title {
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        .stat-value-large {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .stat-footer {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+        
+        @media (max-width: 1200px) {
+            .time-period-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .time-period-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .expenses-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1><i class="fas fa-chart-network"></i> Restoran Kar/Zarar Analiz Sistemi</h1>
+                <p class="subtitle">Profesyonel kar/zarar analizi ve performans takibi - Gerçek zamanlı veri analizi</p>
+                <div class="time-period-selector">
+                    <button class="time-period-btn active" data-period="day">
+                        <i class="fas fa-calendar-day"></i> Günlük
+                    </button>
+                    <button class="time-period-btn" data-period="week">
+                        <i class="fas fa-calendar-week"></i> Haftalık
+                    </button>
+                    <button class="time-period-btn" data-period="month">
+                        <i class="fas fa-calendar-alt"></i> Aylık
+                    </button>
+                    <button class="time-period-btn" data-period="year">
+                        <i class="fas fa-calendar"></i> Yıllık
+                    </button>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="header-total-profit">0 ₺</div>
+                    <div class="stat-trend" id="header-trend">
+                        <i class="fas fa-minus"></i> <span>0%</span>
+                    </div>
+                    <div class="stat-label">NET KAR/ZARAR</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="header-profit-margin">0%</div>
+                    <div class="stat-trend" id="margin-trend">
+                        <i class="fas fa-minus"></i> <span>0%</span>
+                    </div>
+                    <div class="stat-label">KAR MARJI</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="header-total-sales">0</div>
+                    <div class="stat-trend" id="sales-trend">
+                        <i class="fas fa-minus"></i> <span>0%</span>
+                    </div>
+                    <div class="stat-label">TOPLAM SATIŞ</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Zaman Periyodu Karşılaştırma -->
+        <div class="time-period-cards">
+            <div class="period-card active" data-period="day">
+                <div class="period-icon">
+                    <i class="fas fa-sun"></i>
+                </div>
+                <div class="period-title">GÜNLÜK</div>
+                <div class="period-value" id="period-day">0 ₺</div>
+                <div class="period-change change-positive" id="period-day-change">+0%</div>
+            </div>
+            <div class="period-card" data-period="week">
+                <div class="period-icon">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="period-title">HAFTALIK</div>
+                <div class="period-value" id="period-week">0 ₺</div>
+                <div class="period-change" id="period-week-change">0%</div>
+            </div>
+            <div class="period-card" data-period="month">
+                <div class="period-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="period-title">AYLIK</div>
+                <div class="period-value" id="period-month">0 ₺</div>
+                <div class="period-change" id="period-month-change">0%</div>
+            </div>
+            <div class="period-card" data-period="year">
+                <div class="period-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="period-title">YILLIK</div>
+                <div class="period-value" id="period-year">0 ₺</div>
+                <div class="period-change" id="period-year-change">0%</div>
+            </div>
+        </div>
+        
+        <!-- Karşılaştırma Grafiği -->
+        <div class="comparison-container">
+            <div class="analysis-header">
+                <div class="analysis-title">
+                    <i class="fas fa-chart-area"></i> Zaman Periyodu Karşılaştırması
+                </div>
+                <div class="download-buttons">
+                    <button class="action-btn" onclick="downloadComparisonChart()">
+                        <i class="fas fa-image"></i> Grafiği İndir
+                    </button>
+                </div>
+            </div>
+            <div class="comparison-chart">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Detaylı Rapor -->
+        <div class="detailed-report">
+            <div class="analysis-header">
+                <div class="analysis-title">
+                    <i class="fas fa-file-alt"></i> Detaylı Performans Raporu
+                </div>
+                <button class="btn btn-info" onclick="generateDetailedReport()">
+                    <i class="fas fa-download"></i> Tam Rapor İndir
+                </button>
+            </div>
+            
+            <div class="report-grid">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="fas fa-bullseye"></i> Hedef Performans
+                    </div>
+                    <div class="report-value" id="target-performance">%0</div>
+                    <div class="report-desc">
+                        Aylık 5000 ₺ kar hedefine ulaşma oranı
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="fas fa-trend-up"></i> Büyüme Oranı
+                    </div>
+                    <div class="report-value" id="growth-rate">%0</div>
+                    <div class="report-desc">
+                        Önceki periyoda göre büyüme oranı
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="fas fa-percentage"></i> Verimlilik
+                    </div>
+                    <div class="report-value" id="efficiency">%0</div>
+                    <div class="report-desc">
+                        Maliyet/ciro verimlilik oranı
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Diğer Harcamalar -->
+        <div class="other-expenses">
+            <div class="expenses-header">
+                <h3><i class="fas fa-money-bill-wave"></i> Diğer Harcamalar</h3>
+                <div class="action-buttons">
+                    <button class="btn btn-warning" id="btn-reset-expenses">
+                        <i class="fas fa-redo"></i> Harcamaları Sıfırla
+                    </button>
+                </div>
+            </div>
+            <div class="expenses-grid">
+                <div class="input-group">
+                    <label><i class="fas fa-users"></i> Personel Giderleri (₺)</label>
+                    <input type="number" class="input-field" id="expense-personel" value="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-home"></i> Kira Gideri (₺)</label>
+                    <input type="number" class="input-field" id="expense-kira" value="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-bolt"></i> Elektrik/Su/Doğalgaz (₺)</label>
+                    <input type="number" class="input-field" id="expense-enerji" value="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-truck"></i> Nakliye/Dağıtım (₺)</label>
+                    <input type="number" class="input-field" id="expense-nakliye" value="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-ad"></i> Reklam/Pazarlama (₺)</label>
+                    <input type="number" class="input-field" id="expense-reklam" value="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-tools"></i> Bakım/Onarım (₺)</label>
+                    <input type="number" class="input-field" id="expense-bakim" value="0" min="0">
+                </div>
+            </div>
+            <div class="dashboard-grid" style="margin-top: 30px;">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Toplam Diğer Harcamalar</div>
+                        <div class="stat-value-large" id="total-other-expenses">0 ₺</div>
+                    </div>
+                    <div class="stat-footer">
+                        <i class="fas fa-info-circle"></i> Aylık toplam genel gider
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Harcama/Ciro Oranı</div>
+                        <div class="stat-value-large" id="expense-ratio">0%</div>
+                    </div>
+                    <div class="stat-footer">
+                        <i class="fas fa-info-circle"></i> Genel giderlerin ciroya oranı
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="products-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-list-alt"></i> Ürün Yönetimi
+                    </div>
+                    <div class="section-controls">
+                        <button class="btn btn-primary" id="btn-calculate">
+                            <i class="fas fa-calculator"></i> Hesapla
+                        </button>
+                        <button class="btn btn-info" id="btn-download">
+                            <i class="fas fa-download"></i> Rapor İndir
+                        </button>
+                        <button class="btn btn-danger" id="btn-reset-all">
+                            <i class="fas fa-trash-alt"></i> Tümünü Sil
+                        </button>
+                    </div>
+                </div>
+                <div class="products-container">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th width="18%">ÜRÜN</th>
+                                <th width="10%">KATEGORİ</th>
+                                <th width="10%">SATILAN ADET</th>
+                                <th width="10%">SATIŞ FİYATI (₺)</th>
+                                <th width="10%">MALİYET (₺)</th>
+                                <th width="10%">ADET KARI (₺)</th>
+                                <th width="12%">TOPLAM KAR (₺)</th>
+                                <th width="20%">İŞLEMLER</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-body">
+                            <!-- Ürünler buraya JavaScript ile eklenecek -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-status" id="data-status">
+                    <i class="fas fa-database"></i> Son kayıt: <span id="last-save">-</span> | 
+                    Otomatik kayıt: <span id="auto-save-status">Aktif</span>
+                </div>
+            </div>
+            
+            <div class="analysis-section">
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-title">
+                            <i class="fas fa-chart-pie"></i> Kar/Zarar Analizi
+                        </div>
+                        <div class="download-buttons">
+                            <button class="action-btn" title="Excel İndir" onclick="downloadExcel()">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </button>
+                            <button class="action-btn" title="PDF İndir" onclick="downloadQuickPDF()">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-stats">
+                        <div class="summary-stat">
+                            <h4>Toplam Ciro</h4>
+                            <div class="summary-value" id="summary-revenue">0 ₺</div>
+                        </div>
+                        <div class="summary-stat">
+                            <h4>Toplam Maliyet</h4>
+                            <div class="summary-value" id="summary-cost">0 ₺</div>
+                        </div>
+                        <div class="summary-stat">
+                            <h4>Net Kar/Zarar</h4>
+                            <div class="summary-value" id="summary-profit">0 ₺</div>
+                        </div>
+                        <div class="summary-stat">
+                            <h4>Kar/Zarar Marjı</h4>
+                            <div class="summary-value" id="summary-margin">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profit-breakdown">
+                        <h4 style="margin-bottom: 15px; color: var(--primary); font-size: 1.2rem;">
+                            <i class="fas fa-chart-bar"></i> Performans Özeti
+                        </h4>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">En Karlı Ürün</span>
+                            <span class="breakdown-value" id="most-profitable">-</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">En Çok Satılan</span>
+                            <span class="breakdown-value" id="most-sold">-</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Toplam Satılan Adet</span>
+                            <span class="breakdown-value" id="total-units">0</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Ortalama Kar Marjı</span>
+                            <span class="breakdown-value" id="avg-margin">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-title">
+                            <i class="fas fa-exclamation-triangle"></i> Risk Analizi
+                        </div>
+                        <span class="badge" id="risk-level" style="background: #27ae60; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 600;">
+                            DÜŞÜK RİSK
+                        </span>
+                    </div>
+                    
+                    <div class="zarar-analysis" id="zarar-analysis">
+                        <!-- Zarar analizi buraya eklenecek -->
+                    </div>
+                    
+                    <div style="margin-top: 25px;">
+                        <h4 style="margin-bottom: 15px; color: var(--primary);">
+                            <i class="fas fa-bullseye"></i> Hedef Takip: 5000 ₺ Aylık Kar
+                        </h4>
+                        <div class="performance-meter">
+                            <div class="performance-fill" id="target-progress" style="width: 0%; background: linear-gradient(to right, #27ae60, #2ecc71);"></div>
+                        </div>
+                        <div class="performance-labels">
+                            <span>0 ₺</span>
+                            <span>2500 ₺</span>
+                            <span>5000 ₺</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px; font-weight: 600; color: var(--primary);">
+                            Kalan: <span id="remaining-target">5000 ₺</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard İstatistikleri -->
+        <div class="dashboard-section">
+            <div class="dashboard-card">
+                <div class="dashboard-title">
+                    <i class="fas fa-chart-line"></i> Satış Trendi
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <div class="dashboard-title">
+                    <i class="fas fa-balance-scale"></i> Kategori Performansı
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Restoran Kar/Zarar Analiz Sistemi - Profesyonel Edition | 
+                Veriler otomatik olarak tarayıcınızda saklanır | 
+                Son güncelleme: <span id="current-date"></span></p>
+        </footer>
+    </div>
+    
+    <!-- İndirme Seçenekleri Modalı -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-download"></i> Profesyonel Rapor İndir</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px;">İndirmek istediğiniz rapor formatını seçin:</p>
+                <div class="report-grid">
+                    <div class="report-card" onclick="downloadPDF()" style="cursor: pointer;">
+                        <div class="report-title">
+                            <i class="fas fa-file-pdf"></i> PDF Rapor
+                        </div>
+                        <div class="report-desc">
+                            Detaylı profesyonel analiz raporu (Tüm veriler ve grafikler)
+                        </div>
+                    </div>
+                    <div class="report-card" onclick="downloadExcel()" style="cursor: pointer;">
+                        <div class="report-title">
+                            <i class="fas fa-file-excel"></i> Excel Rapor
+                        </div>
+                        <div class="report-desc">
+                            Tüm verileri Excel formatında indir (Düzenlenebilir)
+                        </div>
+                    </div>
+                    <div class="report-card" onclick="downloadHTML()" style="cursor: pointer;">
+                        <div class="report-title">
+                            <i class="fas fa-file-code"></i> HTML Rapor
+                        </div>
+                        <div class="report-desc">
+                            Tam HTML raporu (Web'de görüntülenebilir)
+                        </div>
+                    </div>
+                    <div class="report-card" onclick="downloadComparisonReport()" style="cursor: pointer;">
+                        <div class="report-title">
+                            <i class="fas fa-chart-bar"></i> Karşılaştırma Raporu
+                        </div>
+                        <div class="report-desc">
+                            Zaman periyodu karşılaştırma raporu
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()">İptal</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Onay Modalı -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Onay</h3>
+                <button class="close-modal" onclick="closeConfirmModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Bu işlemi yapmak istediğinizden emin misiniz?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeConfirmModal()">İptal</button>
+                <button class="btn btn-danger" id="confirm-action-btn">Onayla</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notification-text">Bildirim mesajı</span>
+    </div>
+    
+    <script>
+        // Luxon DateTime nesnesi
+        const DateTime = luxon.DateTime;
+        
+        // Storage anahtarları
+        const STORAGE_KEYS = {
+            PRODUCTS: 'restoran_urunler_pro',
+            EXPENSES: 'restoran_harcamalar_pro',
+            TIME_DATA: 'restoran_time_data',
+            LAST_SAVE: 'restoran_last_save_pro',
+            DAILY_DATA: 'restoran_daily_data',
+            WEEKLY_DATA: 'restoran_weekly_data',
+            MONTHLY_DATA: 'restoran_monthly_data',
+            YEARLY_DATA: 'restoran_yearly_data'
+        };
+        
+        // Zaman periyodu verileri
+        let timePeriodData = {
+            day: { profit: 0, revenue: 0, cost: 0, date: DateTime.now().toFormat('yyyy-MM-dd') },
+            week: { profit: 0, revenue: 0, cost: 0, week: DateTime.now().weekNumber, year: DateTime.now().year },
+            month: { profit: 0, revenue: 0, cost: 0, month: DateTime.now().month, year: DateTime.now().year },
+            year: { profit: 0, revenue: 0, cost: 0, year: DateTime.now().year }
+        };
+        
+        // Geçmiş veriler
+        let historicalData = {
+            daily: [],
+            weekly: [],
+            monthly: [],
+            yearly: []
+        };
+        
+        // Ürün Veritabanı (Başlangıçta boş)
+        let urunler = [
+            { id: 1, ad: "Tek Lavaş", kategori: "Ana Yemek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-bread-slice" },
+            { id: 2, ad: "Çift Lavaş", kategori: "Ana Yemek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-hamburger" },
+            { id: 3, ad: "Sütlü Ekmek", kategori: "Tatlı", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-cookie-bite" },
+            { id: 4, ad: "Zurna", kategori: "Ana Yemek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-drumstick-bite" },
+            { id: 5, ad: "İçi 1 Buçuk", kategori: "Ana Yemek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-pepper-hot" },
+            { id: 6, ad: "Ayran", kategori: "İçecek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-glass-whiskey" },
+            { id: 7, ad: "Şalgam", kategori: "İçecek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-wine-glass-alt" },
+            { id: 8, ad: "Kola", kategori: "İçecek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-wine-bottle" },
+            { id: 9, ad: "Su", kategori: "İçecek", adet: 0, satisFiyati: 0, maliyet: 0, icon: "fas fa-tint" }
+        ];
+        
+        // Diğer harcamalar
+        let otherExpenses = {
+            personel: 0,
+            kira: 0,
+            enerji: 0,
+            nakliye: 0,
+            reklam: 0,
+            bakim: 0
+        };
+        
+        // Aktif zaman periyodu
+        let activePeriod = 'day';
+        
+        // Grafik değişkenleri
+        let profitChart = null;
+        let comparisonChart = null;
+        let trendChart = null;
+        let categoryChart = null;
+        
+        // Sayfa yüklendiğinde uygulamayı başlat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tarih bilgisini güncelle
+            document.getElementById('current-date').textContent = DateTime.now().toLocaleString(DateTime.DATETIME_FULL);
+            
+            // Verileri yükle
+            loadDataFromStorage();
+            loadHistoricalData();
+            
+            // UI'ı başlat
+            renderProductsTable();
+            initCharts();
+            updateAllCalculations();
+            updateTimePeriodDisplay();
+            updateLastSaveTime();
+            
+            // Buton event listener'ları
+            document.getElementById('btn-calculate').addEventListener('click', function() {
+                updateAllCalculations();
+                saveHistoricalData();
+                showNotification('Hesaplamalar güncellendi ve kaydedildi!', 'success');
+            });
+            
+            document.getElementById('btn-reset-all').addEventListener('click', function() {
+                showConfirm('Tüm verileri silmek istediğinize emin misiniz? Bu işlem geri alınamaz.', resetAllData);
+            });
+            
+            document.getElementById('btn-reset-expenses').addEventListener('click', function() {
+                showConfirm('Diğer harcamaları sıfırlamak istediğinize emin misiniz?', resetExpenses);
+            });
+            
+            document.getElementById('btn-download').addEventListener('click', function() {
+                openDownloadModal();
+            });
+            
+            // Zaman periyodu butonları
+            document.querySelectorAll('.time-period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setActivePeriod(this.dataset.period);
+                });
+            });
+            
+            // Zaman periyodu kartları
+            document.querySelectorAll('.period-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    setActivePeriod(this.dataset.period);
+                });
+            });
+            
+            // Diğer harcamalar input değişikliklerini dinle
+            document.querySelectorAll('#expense-personel, #expense-kira, #expense-enerji, #expense-nakliye, #expense-reklam, #expense-bakim').forEach(input => {
+                input.addEventListener('input', function() {
+                    updateOtherExpenses();
+                    updateAllCalculations();
+                    saveDataToStorage();
+                });
+            });
+            
+            // Otomatik kaydetme için input değişikliklerini dinle
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('adet-input') || 
+                    e.target.classList.contains('fiyat-input') || 
+                    e.target.classList.contains('maliyet-input')) {
+                    setTimeout(() => {
+                        saveDataToStorage();
+                        saveHistoricalData();
+                    }, 500);
+                }
+            });
+            
+            // Sayfa kapatılırken verileri kaydet
+            window.addEventListener('beforeunload', function() {
+                saveDataToStorage();
+                saveHistoricalData();
+            });
+            
+            // Her 30 saniyede bir otomatik kaydet
+            setInterval(() => {
+                saveDataToStorage();
+                updateLastSaveTime();
+                document.getElementById('auto-save-status').textContent = DateTime.now().toFormat('HH:mm:ss');
+            }, 30000);
+            
+            // Her saat başı tarihsel veri kaydet
+            setInterval(saveHistoricalData, 3600000);
+            
+            showNotification('Profesyonel analiz sistemi yüklendi!', 'success');
+        });
+        
+        // Storage'dan verileri yükle
+        function loadDataFromStorage() {
+            try {
+                // Ürün verilerini yükle
+                const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+                if (savedProducts) {
+                    const parsed = JSON.parse(savedProducts);
+                    urunler = parsed.map(urun => ({
+                        ...urun,
+                        satisFiyati: urun.satisFiyati || 0,
+                        maliyet: urun.maliyet || 0,
+                        adet: urun.adet || 0
+                    }));
+                }
+                
+                // Diğer harcamaları yükle
+                const savedExpenses = localStorage.getItem(STORAGE_KEYS.EXPENSES);
+                if (savedExpenses) {
+                    otherExpenses = JSON.parse(savedExpenses);
+                }
+                
+                // Zaman periyodu verilerini yükle
+                const savedTimeData = localStorage.getItem(STORAGE_KEYS.TIME_DATA);
+                if (savedTimeData) {
+                    timePeriodData = JSON.parse(savedTimeData);
+                }
+                
+                // Input alanlarını doldur
+                document.getElementById('expense-personel').value = otherExpenses.personel || 0;
+                document.getElementById('expense-kira').value = otherExpenses.kira || 0;
+                document.getElementById('expense-enerji').value = otherExpenses.enerji || 0;
+                document.getElementById('expense-nakliye').value = otherExpenses.nakliye || 0;
+                document.getElementById('expense-reklam').value = otherExpenses.reklam || 0;
+                document.getElementById('expense-bakim').value = otherExpenses.bakim || 0;
+                
+            } catch (e) {
+                console.error('Veriler yüklenemedi:', e);
+            }
+        }
+        
+        // Tarihsel verileri yükle
+        function loadHistoricalData() {
+            try {
+                const daily = localStorage.getItem(STORAGE_KEYS.DAILY_DATA);
+                const weekly = localStorage.getItem(STORAGE_KEYS.WEEKLY_DATA);
+                const monthly = localStorage.getItem(STORAGE_KEYS.MONTHLY_DATA);
+                const yearly = localStorage.getItem(STORAGE_KEYS.YEARLY_DATA);
+                
+                if (daily) historicalData.daily = JSON.parse(daily);
+                if (weekly) historicalData.weekly = JSON.parse(weekly);
+                if (monthly) historicalData.monthly = JSON.parse(monthly);
+                if (yearly) historicalData.yearly = JSON.parse(yearly);
+                
+            } catch (e) {
+                console.error('Tarihsel veriler yüklenemedi:', e);
+            }
+        }
+        
+        // Tarihsel verileri kaydet
+        function saveHistoricalData() {
+            const now = DateTime.now();
+            const today = now.toFormat('yyyy-MM-dd');
+            
+            // Günlük veri kaydet
+            const dailyEntry = {
+                date: today,
+                profit: timePeriodData.day.profit,
+                revenue: timePeriodData.day.revenue,
+                cost: timePeriodData.day.cost,
+                timestamp: now.toISO()
+            };
+            
+            // Aynı günün kaydını kontrol et ve güncelle
+            const existingDayIndex = historicalData.daily.findIndex(d => d.date === today);
+            if (existingDayIndex >= 0) {
+                historicalData.daily[existingDayIndex] = dailyEntry;
+            } else {
+                historicalData.daily.push(dailyEntry);
+                // Son 30 günü tut
+                if (historicalData.daily.length > 30) {
+                    historicalData.daily = historicalData.daily.slice(-30);
+                }
+            }
+            
+            // Haftalık veri kaydet (hafta sonunda)
+            if (now.weekday === 7) { // Pazar günü
+                const weekEntry = {
+                    week: now.weekNumber,
+                    year: now.year,
+                    profit: timePeriodData.week.profit,
+                    revenue: timePeriodData.week.revenue,
+                    cost: timePeriodData.week.cost,
+                    timestamp: now.toISO()
+                };
+                
+                const existingWeekIndex = historicalData.weekly.findIndex(w => 
+                    w.week === now.weekNumber && w.year === now.year);
+                
+                if (existingWeekIndex >= 0) {
+                    historicalData.weekly[existingWeekIndex] = weekEntry;
+                } else {
+                    historicalData.weekly.push(weekEntry);
+                    if (historicalData.weekly.length > 12) {
+                        historicalData.weekly = historicalData.weekly.slice(-12);
+                    }
+                }
+            }
+            
+            // Aylık veri kaydet (ay sonunda)
+            if (now.day === now.daysInMonth) {
+                const monthEntry = {
+                    month: now.month,
+                    year: now.year,
+                    profit: timePeriodData.month.profit,
+                    revenue: timePeriodData.month.revenue,
+                    cost: timePeriodData.month.cost,
+                    timestamp: now.toISO()
+                };
+                
+                const existingMonthIndex = historicalData.monthly.findIndex(m => 
+                    m.month === now.month && m.year === now.year);
+                
+                if (existingMonthIndex >= 0) {
+                    historicalData.monthly[existingMonthIndex] = monthEntry;
+                } else {
+                    historicalData.monthly.push(monthEntry);
+                    if (historicalData.monthly.length > 12) {
+                        historicalData.monthly = historicalData.monthly.slice(-12);
+                    }
+                }
+            }
+            
+            // Yıllık veri kaydet (yıl sonunda)
+            if (now.month === 12 && now.day === 31) {
+                const yearEntry = {
+                    year: now.year,
+                    profit: timePeriodData.year.profit,
+                    revenue: timePeriodData.year.revenue,
+                    cost: timePeriodData.year.cost,
+                    timestamp: now.toISO()
+                };
+                
+                const existingYearIndex = historicalData.yearly.findIndex(y => y.year === now.year);
+                if (existingYearIndex >= 0) {
+                    historicalData.yearly[existingYearIndex] = yearEntry;
+                } else {
+                    historicalData.yearly.push(yearEntry);
+                    if (historicalData.yearly.length > 5) {
+                        historicalData.yearly = historicalData.yearly.slice(-5);
+                    }
+                }
+            }
+            
+            // Tarihsel verileri storage'a kaydet
+            try {
+                localStorage.setItem(STORAGE_KEYS.DAILY_DATA, JSON.stringify(historicalData.daily));
+                localStorage.setItem(STORAGE_KEYS.WEEKLY_DATA, JSON.stringify(historicalData.weekly));
+                localStorage.setItem(STORAGE_KEYS.MONTHLY_DATA, JSON.stringify(historicalData.monthly));
+                localStorage.setItem(STORAGE_KEYS.YEARLY_DATA, JSON.stringify(historicalData.yearly));
+            } catch (e) {
+                console.error('Tarihsel veriler kaydedilemedi:', e);
+            }
+        }
+        
+        // Verileri Storage'a kaydet
+        function saveDataToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(urunler));
+                localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(otherExpenses));
+                localStorage.setItem(STORAGE_KEYS.TIME_DATA, JSON.stringify(timePeriodData));
+                localStorage.setItem(STORAGE_KEYS.LAST_SAVE, DateTime.now().toISO());
+            } catch (e) {
+                console.error('Veriler kaydedilemedi:', e);
+            }
+            return true;
+        }
+        
+        // Son kayıt zamanını güncelle
+        function updateLastSaveTime() {
+            const lastSave = localStorage.getItem(STORAGE_KEYS.LAST_SAVE);
+            const element = document.getElementById('last-save');
+            
+            if (lastSave) {
+                const date = DateTime.fromISO(lastSave);
+                element.textContent = date.toLocaleString(DateTime.DATETIME_MED);
+            } else {
+                element.textContent = 'Henüz kayıt yok';
+            }
+        }
+        
+        // Aktif periyodu ayarla
+        function setActivePeriod(period) {
+            activePeriod = period;
+            
+            // Butonları güncelle
+            document.querySelectorAll('.time-period-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === period);
+            });
+            
+            // Kartları güncelle
+            document.querySelectorAll('.period-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.period === period);
+            });
+            
+            // Görüntüyü güncelle
+            updateTimePeriodDisplay();
+            updateComparisonChart();
+        }
+        
+        // Zaman periyodu görüntüsünü güncelle
+        function updateTimePeriodDisplay() {
+            const now = DateTime.now();
+            
+            // Günlük veriler
+            document.getElementById('period-day').textContent = `${timePeriodData.day.profit.toFixed(2)} ₺`;
+            
+            // Haftalık veriler
+            document.getElementById('period-week').textContent = `${timePeriodData.week.profit.toFixed(2)} ₺`;
+            
+            // Aylık veriler
+            document.getElementById('period-month').textContent = `${timePeriodData.month.profit.toFixed(2)} ₺`;
+            
+            // Yıllık veriler
+            document.getElementById('period-year').textContent = `${timePeriodData.year.profit.toFixed(2)} ₺`;
+            
+            // Değişim yüzdelerini hesapla ve göster
+            updatePeriodChanges();
+        }
+        
+        // Periyod değişimlerini güncelle
+        function updatePeriodChanges() {
+            // Basit trend hesaplaması
+            const dayChange = calculateTrend('day');
+            const weekChange = calculateTrend('week');
+            const monthChange = calculateTrend('month');
+            const yearChange = calculateTrend('year');
+            
+            // Güncelle
+            updateChangeElement('period-day-change', dayChange);
+            updateChangeElement('period-week-change', weekChange);
+            updateChangeElement('period-month-change', monthChange);
+            updateChangeElement('period-year-change', yearChange);
+            
+            // Header trendleri güncelle
+            updateHeaderTrends();
+        }
+        
+        // Trend hesapla
+        function calculateTrend(period) {
+            const current = timePeriodData[period].profit;
+            let previous = 0;
+            
+            if (period === 'day' && historicalData.daily.length > 1) {
+                previous = historicalData.daily[historicalData.daily.length - 2].profit || 0;
+            } else if (period === 'week' && historicalData.weekly.length > 1) {
+                previous = historicalData.weekly[historicalData.weekly.length - 2].profit || 0;
+            } else if (period === 'month' && historicalData.monthly.length > 1) {
+                previous = historicalData.monthly[historicalData.monthly.length - 2].profit || 0;
+            } else if (period === 'year' && historicalData.yearly.length > 1) {
+                previous = historicalData.yearly[historicalData.yearly.length - 2].profit || 0;
+            }
+            
+            if (previous === 0) return 0;
+            return ((current - previous) / Math.abs(previous)) * 100;
+        }
+        
+        // Değişim elementini güncelle
+        function updateChangeElement(elementId, change) {
+            const element = document.getElementById(elementId);
+            const isPositive = change > 0;
+            const isNegative = change < 0;
+            
+            element.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+            element.className = `period-change ${isPositive ? 'change-positive' : isNegative ? 'change-negative' : ''}`;
+        }
+        
+        // Header trendlerini güncelle
+        function updateHeaderTrends() {
+            const profitChange = calculateTrend(activePeriod);
+            const marginChange = 0; // Burada daha detaylı hesaplama yapılabilir
+            const salesChange = 0; // Burada daha detaylı hesaplama yapılabilir
+            
+            updateTrendElement('header-trend', profitChange);
+            updateTrendElement('margin-trend', marginChange);
+            updateTrendElement('sales-trend', salesChange);
+        }
+        
+        // Trend elementini güncelle
+        function updateTrendElement(elementId, change) {
+            const element = document.getElementById(elementId);
+            const icon = element.querySelector('i');
+            const text = element.querySelector('span');
+            
+            text.textContent = `${Math.abs(change).toFixed(1)}%`;
+            
+            if (change > 0) {
+                icon.className = 'fas fa-arrow-up trend-up';
+                element.className = 'stat-trend trend-up';
+            } else if (change < 0) {
+                icon.className = 'fas fa-arrow-down trend-down';
+                element.className = 'stat-trend trend-down';
+            } else {
+                icon.className = 'fas fa-minus';
+                element.className = 'stat-trend';
+            }
+        }
+        
+        // Grafikleri başlat
+        function initCharts() {
+            initProfitChart();
+            initComparisonChart();
+            initTrendChart();
+            initCategoryChart();
+        }
+        
+        // Kar/Zarar grafiğini başlat
+        function initProfitChart() {
+            const ctx = document.getElementById('profitChart').getContext('2d');
+            
+            profitChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ciro', 'Maliyet', 'Net Kar/Zarar'],
+                    datasets: [{
+                        label: 'Tutar (₺)',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.8)',
+                            'rgba(231, 76, 60, 0.8)',
+                            'rgba(46, 204, 113, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(52, 152, 219)',
+                            'rgb(231, 76, 60)',
+                            'rgb(46, 204, 113)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw.toFixed(2)} ₺`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' ₺';
+                                },
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Karşılaştırma grafiğini başlat
+        function initComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            comparisonChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran'],
+                    datasets: [
+                        {
+                            label: 'Ciro',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: 'rgb(52, 152, 219)',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Kar',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: 'rgb(46, 204, 113)',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(2)} ₺`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' ₺';
+                                },
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    }
+                }
+            });
+        }
+        
+        // Trend grafiğini başlat
+        function initTrendChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6', '7'],
+                    datasets: [{
+                        label: 'Günlük Kar (₺)',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: 'rgb(155, 89, 182)',
+                        backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' ₺';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Kategori grafiğini başlat
+        function initCategoryChart() {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ana Yemek', 'Tatlı', 'İçecek'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.8)',
+                            'rgba(46, 204, 113, 0.8)',
+                            'rgba(155, 89, 182, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(52, 152, 219)',
+                            'rgb(46, 204, 113)',
+                            'rgb(155, 89, 182)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value.toFixed(2)} ₺ (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Ürün tablosunu oluştur
+        function renderProductsTable() {
+            const tbody = document.getElementById('products-body');
+            tbody.innerHTML = '';
+            
+            urunler.forEach(urun => {
+                const karAdet = urun.satisFiyati - urun.maliyet;
+                const toplamKar = karAdet * urun.adet;
+                
+                const row = document.createElement('tr');
+                row.className = 'product-row';
+                row.innerHTML = `
+                    <td>
+                        <div class="product-info">
+                            <div class="product-icon">
+                                <i class="${urun.icon}"></i>
+                            </div>
+                            <div>
+                                <div class="product-name">${urun.ad}</div>
+                                <div class="product-category">${urun.kategori}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="product-category">${urun.kategori}</span>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <label>Adet</label>
+                            <input type="number" class="input-field adet-input" 
+                                   data-id="${urun.id}" 
+                                   value="${urun.adet}" 
+                                   min="0" step="1">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <label>Satış (₺)</label>
+                            <input type="number" class="input-field fiyat-input" 
+                                   data-id="${urun.id}" 
+                                   value="${urun.satisFiyati}" 
+                                   min="0" step="1">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <label>Maliyet (₺)</label>
+                            <input type="number" class="input-field maliyet-input" 
+                                   data-id="${urun.id}" 
+                                   value="${urun.maliyet}" 
+                                   min="0" step="1">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="profit-display ${karAdet >= 0 ? 'profit-positive' : 'profit-negative'}">
+                            ${karAdet.toFixed(2)} ₺
+                        </div>
+                    </td>
+                    <td>
+                        <div class="profit-display ${toplamKar >= 0 ? 'profit-positive' : 'profit-negative'}">
+                            ${toplamKar.toFixed(2)} ₺
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn" title="Artır" onclick="increaseQuantity(${urun.id})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="action-btn" title="Azalt" onclick="decreaseQuantity(${urun.id})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="action-btn action-btn-danger" title="Sil" onclick="showConfirm('Bu ürünü silmek istediğinize emin misiniz?', () => deleteProduct(${urun.id}))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Input değişikliklerini dinle
+            attachInputListeners();
+        }
+        
+        // Input değişikliklerini dinle
+        function attachInputListeners() {
+            document.querySelectorAll('.adet-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const urun = urunler.find(u => u.id === id);
+                    if (urun) {
+                        urun.adet = parseInt(this.value) || 0;
+                        updateProductRow(id);
+                        updateAllCalculations();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.fiyat-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const urun = urunler.find(u => u.id === id);
+                    if (urun) {
+                        urun.satisFiyati = parseFloat(this.value) || 0;
+                        updateProductRow(id);
+                        updateAllCalculations();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.maliyet-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const urun = urunler.find(u => u.id === id);
+                    if (urun) {
+                        urun.maliyet = parseFloat(this.value) || 0;
+                        updateProductRow(id);
+                        updateAllCalculations();
+                    }
+                });
+            });
+        }
+        
+        // Diğer harcamaları güncelle
+        function updateOtherExpenses() {
+            otherExpenses.personel = parseFloat(document.getElementById('expense-personel').value) || 0;
+            otherExpenses.kira = parseFloat(document.getElementById('expense-kira').value) || 0;
+            otherExpenses.enerji = parseFloat(document.getElementById('expense-enerji').value) || 0;
+            otherExpenses.nakliye = parseFloat(document.getElementById('expense-nakliye').value) || 0;
+            otherExpenses.reklam = parseFloat(document.getElementById('expense-reklam').value) || 0;
+            otherExpenses.bakim = parseFloat(document.getElementById('expense-bakim').value) || 0;
+            
+            // Toplam diğer harcamaları göster
+            const totalOtherExpenses = Object.values(otherExpenses).reduce((sum, val) => sum + val, 0);
+            document.getElementById('total-other-expenses').textContent = totalOtherExpenses.toFixed(2) + ' ₺';
+            
+            return totalOtherExpenses;
+        }
+        
+        // Ürün satırını güncelle
+        function updateProductRow(id) {
+            const urun = urunler.find(u => u.id === id);
+            if (!urun) return;
+            
+            const karAdet = urun.satisFiyati - urun.maliyet;
+            const toplamKar = karAdet * urun.adet;
+            
+            const row = document.querySelector(`tr input[data-id="${id}"]`).closest('tr');
+            
+            // Kar ve toplam kar hücrelerini güncelle
+            const karCell = row.cells[5];
+            const toplamKarCell = row.cells[6];
+            
+            karCell.innerHTML = `<div class="profit-display ${karAdet >= 0 ? 'profit-positive' : 'profit-negative'}">${karAdet.toFixed(2)} ₺</div>`;
+            toplamKarCell.innerHTML = `<div class="profit-display ${toplamKar >= 0 ? 'profit-positive' : 'profit-negative'}">${toplamKar.toFixed(2)} ₺</div>`;
+        }
+        
+        // Adet artırma
+        function increaseQuantity(id) {
+            const urun = urunler.find(u => u.id === id);
+            if (urun) {
+                urun.adet++;
+                const input = document.querySelector(`.adet-input[data-id="${id}"]`);
+                input.value = urun.adet;
+                updateProductRow(id);
+                updateAllCalculations();
+                saveDataToStorage();
+            }
+        }
+        
+        // Adet azaltma
+        function decreaseQuantity(id) {
+            const urun = urunler.find(u => u.id === id);
+            if (urun && urun.adet > 0) {
+                urun.adet--;
+                const input = document.querySelector(`.adet-input[data-id="${id}"]`);
+                input.value = urun.adet;
+                updateProductRow(id);
+                updateAllCalculations();
+                saveDataToStorage();
+            }
+        }
+        
+        // Ürün silme
+        function deleteProduct(id) {
+            urunler = urunler.filter(u => u.id !== id);
+            renderProductsTable();
+            updateAllCalculations();
+            saveDataToStorage();
+            showNotification('Ürün silindi!', 'success');
+        }
+        
+        // Tüm hesaplamaları güncelle
+        function updateAllCalculations() {
+            const totalOtherExpenses = updateOtherExpenses();
+            const now = DateTime.now();
+            
+            let toplamCiro = 0;
+            let toplamMaliyet = 0;
+            let toplamKar = 0;
+            let toplamAdet = 0;
+            let kategoriCiro = { 'Ana Yemek': 0, 'Tatlı': 0, 'İçecek': 0 };
+            
+            let enKarliUrun = { ad: "-", kar: -Infinity };
+            let enCokSatanUrun = { ad: "-", adet: -1 };
+            
+            // Zarar analizi için değişkenler
+            let zararliUrunler = [];
+            let toplamZarar = 0;
+            let zararliUrunSayisi = 0;
+            
+            // Her ürün için hesaplama
+            urunler.forEach(urun => {
+                const ciro = urun.satisFiyati * urun.adet;
+                const maliyet = urun.maliyet * urun.adet;
+                const kar = ciro - maliyet;
+                const karAdet = urun.satisFiyati - urun.maliyet;
+                
+                toplamCiro += ciro;
+                toplamMaliyet += maliyet;
+                toplamKar += kar;
+                toplamAdet += urun.adet;
+                
+                // Kategori cirolarını hesapla
+                if (kategoriCiro.hasOwnProperty(urun.kategori)) {
+                    kategoriCiro[urun.kategori] += ciro;
+                }
+                
+                // Zarar durumunu kontrol et
+                if (kar < 0) {
+                    zararliUrunler.push({
+                        ad: urun.ad,
+                        zarar: Math.abs(kar),
+                        adet: urun.adet
+                    });
+                    toplamZarar += Math.abs(kar);
+                    zararliUrunSayisi++;
+                }
+                
+                if (kar > enKarliUrun.kar && urun.adet > 0) {
+                    enKarliUrun = { ad: urun.ad, kar: kar };
+                }
+                
+                if (urun.adet > enCokSatanUrun.adet) {
+                    enCokSatanUrun = { ad: urun.ad, adet: urun.adet };
+                }
+            });
+            
+            // Diğer harcamaları toplam maliyete ekle
+            toplamMaliyet += totalOtherExpenses;
+            toplamKar -= totalOtherExpenses;
+            
+            const karMarji = toplamCiro > 0 ? (toplamKar / toplamCiro) * 100 : 0;
+            const ortalamaKarMarji = urunler.filter(u => u.adet > 0).length > 0 ? 
+                urunler.filter(u => u.adet > 0)
+                    .map(u => ((u.satisFiyati - u.maliyet) / u.satisFiyati) * 100)
+                    .reduce((a, b) => a + b, 0) / urunler.filter(u => u.adet > 0).length : 0;
+            
+            // Header güncelle
+            const headerProfit = document.getElementById('header-total-profit');
+            const headerMargin = document.getElementById('header-profit-margin');
+            
+            headerProfit.textContent = toplamKar.toFixed(2) + ' ₺';
+            headerMargin.textContent = karMarji.toFixed(1) + '%';
+            
+            if (toplamKar > 0) {
+                headerProfit.className = 'stat-value profit-positive';
+                headerMargin.className = 'stat-value profit-positive';
+            } else if (toplamKar < 0) {
+                headerProfit.className = 'stat-value profit-negative';
+                headerMargin.className = 'stat-value profit-negative';
+            } else {
+                headerProfit.className = 'stat-value';
+                headerMargin.className = 'stat-value';
+            }
+            
+            document.getElementById('header-total-sales').textContent = toplamAdet;
+            
+            // Özet güncelle
+            const summaryProfit = document.getElementById('summary-profit');
+            const summaryMargin = document.getElementById('summary-margin');
+            
+            document.getElementById('summary-revenue').textContent = toplamCiro.toFixed(2) + ' ₺';
+            document.getElementById('summary-cost').textContent = toplamMaliyet.toFixed(2) + ' ₺';
+            summaryProfit.textContent = toplamKar.toFixed(2) + ' ₺';
+            summaryMargin.textContent = karMarji.toFixed(1) + '%';
+            
+            // Kar/Zarar durumuna göre renk değiştir
+            if (toplamKar > 0) {
+                summaryProfit.className = 'summary-value profit-positive';
+                summaryMargin.className = 'summary-value profit-positive';
+            } else if (toplamKar < 0) {
+                summaryProfit.className = 'summary-value profit-negative';
+                summaryMargin.className = 'summary-value profit-negative';
+            } else {
+                summaryProfit.className = 'summary-value';
+                summaryMargin.className = 'summary-value';
+            }
+            
+            // Performans özeti
+            document.getElementById('most-profitable').textContent = enKarliUrun.ad !== "-" ? 
+                `${enKarliUrun.ad} (${enKarliUrun.kar.toFixed(2)} ₺)` : "-";
+            document.getElementById('most-sold').textContent = enCokSatanUrun.ad !== "-" ? 
+                `${enCokSatanUrun.ad} (${enCokSatanUrun.adet} adet)` : "-";
+            document.getElementById('total-units').textContent = toplamAdet;
+            document.getElementById('avg-margin').textContent = ortalamaKarMarji.toFixed(1) + '%';
+            
+            // Hedef ilerlemesini güncelle
+            const targetProgress = toplamKar >= 0 ? Math.min((toplamKar / 5000) * 100, 100) : 0;
+            document.getElementById('target-progress').style.width = targetProgress + '%';
+            document.getElementById('remaining-target').textContent = Math.max(0, 5000 - toplamKar).toFixed(2) + ' ₺';
+            
+            // Harcama/ciro oranı
+            const expenseRatio = toplamCiro > 0 ? (totalOtherExpenses / toplamCiro) * 100 : 0;
+            document.getElementById('expense-ratio').textContent = expenseRatio.toFixed(1) + '%';
+            
+            // Performans metrikleri
+            document.getElementById('target-performance').textContent = `${targetProgress.toFixed(1)}%`;
+            document.getElementById('growth-rate').textContent = `${calculateTrend(activePeriod).toFixed(1)}%`;
+            document.getElementById('efficiency').textContent = `${(100 - expenseRatio).toFixed(1)}%`;
+            
+            // Zaman periyodu verilerini güncelle
+            timePeriodData.day = { profit: toplamKar, revenue: toplamCiro, cost: toplamMaliyet, date: now.toFormat('yyyy-MM-dd') };
+            timePeriodData.week.profit += toplamKar;
+            timePeriodData.week.revenue += toplamCiro;
+            timePeriodData.week.cost += toplamMaliyet;
+            timePeriodData.month.profit += toplamKar;
+            timePeriodData.month.revenue += toplamCiro;
+            timePeriodData.month.cost += toplamMaliyet;
+            timePeriodData.year.profit += toplamKar;
+            timePeriodData.year.revenue += toplamCiro;
+            timePeriodData.year.cost += toplamMaliyet;
+            
+            // Grafikleri güncelle
+            updateChart(toplamCiro, toplamMaliyet, toplamKar);
+            updateComparisonChart();
+            updateTrendChart();
+            updateCategoryChart(kategoriCiro);
+            
+            // Zarar analizini güncelle
+            updateZararAnalysis(zararliUrunler, toplamZarar, zararliUrunSayisi, totalOtherExpenses);
+            
+            // Risk seviyesini güncelle
+            updateRiskLevel(toplamZarar, zararliUrunSayisi, toplamKar);
+            
+            // Periyod değişimlerini güncelle
+            updatePeriodChanges();
+        }
+        
+        // Grafiği güncelle
+        function updateChart(ciro, maliyet, kar) {
+            if (profitChart) {
+                // Net kar negatifse rengi değiştir
+                const netKarColor = kar >= 0 ? 'rgba(46, 204, 113, 0.8)' : 'rgba(231, 76, 60, 0.8)';
+                const netKarBorder = kar >= 0 ? 'rgb(46, 204, 113)' : 'rgb(231, 76, 60)';
+                
+                profitChart.data.datasets[0].data = [ciro, maliyet, kar];
+                profitChart.data.datasets[0].backgroundColor[2] = netKarColor;
+                profitChart.data.datasets[0].borderColor[2] = netKarBorder;
+                profitChart.update();
+            }
+        }
+        
+        // Karşılaştırma grafiğini güncelle
+        function updateComparisonChart() {
+            if (comparisonChart) {
+                // Tarihsel verilerden örnek veriler
+                const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran'];
+                const revenueData = historicalData.monthly.slice(-6).map(m => m.revenue || 0);
+                const profitData = historicalData.monthly.slice(-6).map(m => m.profit || 0);
+                
+                // Eksik verileri tamamla
+                while (revenueData.length < 6) revenueData.push(0);
+                while (profitData.length < 6) profitData.push(0);
+                
+                comparisonChart.data.labels = months.slice(-6);
+                comparisonChart.data.datasets[0].data = revenueData;
+                comparisonChart.data.datasets[1].data = profitData;
+                comparisonChart.update();
+            }
+        }
+        
+        // Trend grafiğini güncelle
+        function updateTrendChart() {
+            if (trendChart) {
+                // Son 7 günlük veriler
+                const last7Days = historicalData.daily.slice(-7);
+                const labels = last7Days.map(d => DateTime.fromISO(d.timestamp).toFormat('dd/MM'));
+                const data = last7Days.map(d => d.profit || 0);
+                
+                // Eksik verileri tamamla
+                while (labels.length < 7) {
+                    const date = DateTime.now().minus({ days: 7 - labels.length });
+                    labels.push(date.toFormat('dd/MM'));
+                    data.push(0);
+                }
+                
+                trendChart.data.labels = labels;
+                trendChart.data.datasets[0].data = data;
+                trendChart.update();
+            }
+        }
+        
+        // Kategori grafiğini güncelle
+        function updateCategoryChart(kategoriCiro) {
+            if (categoryChart) {
+                const labels = Object.keys(kategoriCiro);
+                const data = Object.values(kategoriCiro);
+                
+                categoryChart.data.labels = labels;
+                categoryChart.data.datasets[0].data = data;
+                categoryChart.update();
+            }
+        }
+        
+        // Zarar analizini güncelle
+        function updateZararAnalysis(zararliUrunler, toplamZarar, zararliUrunSayisi, totalOtherExpenses) {
+            const zararContainer = document.getElementById('zarar-analysis');
+            const totalRisk = toplamZarar + totalOtherExpenses;
+            
+            if (zararliUrunSayisi > 0 || totalOtherExpenses > 0) {
+                let zararHTML = `
+                    <h4><i class="fas fa-exclamation-circle"></i> Risk Analizi</h4>
+                    <div class="zarar-item">
+                        <span class="zarar-label">Toplam Risk:</span>
+                        <span class="zarar-value">${totalRisk.toFixed(2)} ₺</span>
+                    </div>
+                `;
+                
+                if (totalOtherExpenses > 0) {
+                    zararHTML += `
+                        <div class="zarar-item">
+                            <span class="zarar-label">Genel Giderler:</span>
+                            <span class="zarar-value">${totalOtherExpenses.toFixed(2)} ₺</span>
+                        </div>
+                    `;
+                }
+                
+                if (zararliUrunSayisi > 0) {
+                    zararHTML += `
+                        <div class="zarar-item">
+                            <span class="zarar-label">Ürün Kayıpları:</span>
+                            <span class="zarar-value">${toplamZarar.toFixed(2)} ₺</span>
+                        </div>
+                        <div class="zarar-item">
+                            <span class="zarar-label">Riskli Ürünler:</span>
+                            <span class="zarar-value">${zararliUrunSayisi}</span>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            Kritik ürünler:
+                    `;
+                    
+                    // İlk 3 zararlı ürünü göster
+                    zararliUrunler.sort((a, b) => b.zarar - a.zarar);
+                    zararliUrunler.slice(0, 3).forEach(urun => {
+                        zararHTML += `<div style="margin-top: 5px;">• ${urun.ad}: ${urun.zarar.toFixed(2)} ₺ risk (${urun.adet} adet)</div>`;
+                    });
+                    
+                    if (zararliUrunler.length > 3) {
+                        zararHTML += `<div style="margin-top: 5px; font-style: italic;">ve ${zararliUrunler.length - 3} ürün daha...</div>`;
+                    }
+                    
+                    zararHTML += `</div>`;
+                }
+                
+                zararContainer.innerHTML = zararHTML;
+            } else {
+                zararContainer.innerHTML = `
+                    <h4><i class="fas fa-check-circle" style="color: #27ae60;"></i> Düşük Risk</h4>
+                    <p style="color: #666; margin-top: 10px;">Risk analizi: Tüm ürünler karlı durumda ve genel giderler kontrol altında.</p>
+                `;
+            }
+        }
+        
+        // Risk seviyesini güncelle
+        function updateRiskLevel(toplamZarar, zararliUrunSayisi, toplamKar) {
+            const riskElement = document.getElementById('risk-level');
+            let riskLevel = 'DÜŞÜK RİSK';
+            let color = '#27ae60';
+            
+            if (toplamKar < 0) {
+                riskLevel = 'YÜKSEK RİSK';
+                color = '#e74c3c';
+            } else if (zararliUrunSayisi > 0 || toplamKar < 1000) {
+                riskLevel = 'ORTA RİSK';
+                color = '#f39c12';
+            }
+            
+            riskElement.textContent = riskLevel;
+            riskElement.style.background = color;
+        }
+        
+        // Tüm verileri sıfırla
+        function resetAllData() {
+            urunler.forEach(urun => {
+                urun.adet = 0;
+                urun.satisFiyati = 0;
+                urun.maliyet = 0;
+            });
+            
+            resetExpenses();
+            
+            // Zaman periyodu verilerini sıfırla
+            const now = DateTime.now();
+            timePeriodData = {
+                day: { profit: 0, revenue: 0, cost: 0, date: now.toFormat('yyyy-MM-dd') },
+                week: { profit: 0, revenue: 0, cost: 0, week: now.weekNumber, year: now.year },
+                month: { profit: 0, revenue: 0, cost: 0, month: now.month, year: now.year },
+                year: { profit: 0, revenue: 0, cost: 0, year: now.year }
+            };
+            
+            renderProductsTable();
+            updateAllCalculations();
+            saveDataToStorage();
+            showNotification('Tüm veriler sıfırlandı!', 'success');
+            closeConfirmModal();
+        }
+        
+        // Diğer harcamaları sıfırla
+        function resetExpenses() {
+            otherExpenses = {
+                personel: 0,
+                kira: 0,
+                enerji: 0,
+                nakliye: 0,
+                reklam: 0,
+                bakim: 0
+            };
+            
+            document.getElementById('expense-personel').value = 0;
+            document.getElementById('expense-kira').value = 0;
+            document.getElementById('expense-enerji').value = 0;
+            document.getElementById('expense-nakliye').value = 0;
+            document.getElementById('expense-reklam').value = 0;
+            document.getElementById('expense-bakim').value = 0;
+            
+            updateOtherExpenses();
+            updateAllCalculations();
+            saveDataToStorage();
+            showNotification('Diğer harcamalar sıfırlandı!', 'success');
+            closeConfirmModal();
+        }
+        
+        // Modal işlemleri
+        function openDownloadModal() {
+            document.getElementById('downloadModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('downloadModal').style.display = 'none';
+        }
+        
+        function showConfirm(message, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirmModal').style.display = 'flex';
+            
+            const confirmBtn = document.getElementById('confirm-action-btn');
+            confirmBtn.onclick = function() {
+                callback();
+                closeConfirmModal();
+            };
+        }
+        
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+        
+        // İndirme işlemleri
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const now = DateTime.now();
+            
+            // Başlık
+            doc.setFontSize(22);
+            doc.setTextColor(44, 62, 80);
+            doc.text('RESTORAN PROFESYONEL ANALİZ RAPORU', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(149, 165, 166);
+            doc.text(`Rapor Tarihi: ${now.toLocaleString(DateTime.DATETIME_FULL)}`, 105, 30, { align: 'center' });
+            
+            // Zaman Periyodu Özeti
+            doc.setFontSize(16);
+            doc.setTextColor(44, 62, 80);
+            doc.text('ZAMAN PERİYODU KARŞILAŞTIRMASI', 20, 50);
+            
+            doc.setFontSize(10);
+            const periods = [
+                ['Günlük', timePeriodData.day.profit],
+                ['Haftalık', timePeriodData.week.profit],
+                ['Aylık', timePeriodData.month.profit],
+                ['Yıllık', timePeriodData.year.profit]
+            ];
+            
+            let yPos = 60;
+            periods.forEach(([label, value]) => {
+                doc.text(`${label}:`, 30, yPos);
+                doc.text(`${value.toFixed(2)} ₺`, 150, yPos, { align: 'right' });
+                yPos += 8;
+            });
+            
+            // Performans Metrikleri
+            yPos += 15;
+            doc.setFontSize(16);
+            doc.text('PERFORMANS METRİKLERİ', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            const metrics = [
+                ['Toplam Ciro', document.getElementById('summary-revenue').textContent],
+                ['Toplam Maliyet', document.getElementById('summary-cost').textContent],
+                ['Net Kar/Zarar', document.getElementById('summary-profit').textContent],
+                ['Kar/Zarar Marjı', document.getElementById('summary-margin').textContent],
+                ['Büyüme Oranı', document.getElementById('growth-rate').textContent],
+                ['Verimlilik', document.getElementById('efficiency').textContent]
+            ];
+            
+            metrics.forEach(([label, value]) => {
+                doc.text(`${label}:`, 30, yPos);
+                doc.text(value, 150, yPos, { align: 'right' });
+                yPos += 8;
+            });
+            
+            // Ürün Tablosu
+            yPos += 15;
+            doc.setFontSize(16);
+            doc.text('ÜRÜN PERFORMANS ANALİZİ', 20, yPos);
+            yPos += 10;
+            
+            const tableData = urunler.map(urun => [
+                urun.ad,
+                urun.kategori,
+                urun.adet.toString(),
+                `${urun.satisFiyati} ₺`,
+                `${urun.maliyet} ₺`,
+                `${(urun.satisFiyati - urun.maliyet).toFixed(2)} ₺`,
+                `${((urun.satisFiyati - urun.maliyet) * urun.adet).toFixed(2)} ₺`
+            ]);
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Ürün', 'Kategori', 'Adet', 'Satış Fiyatı', 'Maliyet', 'Adet Karı', 'Toplam Kar']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [52, 152, 219] },
+                margin: { left: 20, right: 20 }
+            });
+            
+            // Sayfa numarası
+            const pageCount = doc.internal.getNumberOfPages();
+            for(let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(10);
+                doc.setTextColor(149, 165, 166);
+                doc.text(`Sayfa ${i} / ${pageCount}`, 105, 285, { align: 'center' });
+                doc.text(`© ${now.year} Restoran Analiz Sistemi`, 105, 290, { align: 'center' });
+            }
+            
+            doc.save(`restoran-profesyonel-rapor-${now.toFormat('yyyy-MM-dd')}.pdf`);
+            showNotification('Profesyonel PDF rapor indirildi!', 'success');
+            closeModal();
+        }
+        
+        function downloadExcel() {
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            
+            // Başlık
+            csvContent += "RESTORAN PROFESYONEL ANALİZ RAPORU\n";
+            csvContent += `Rapor Tarihi: ${DateTime.now().toLocaleString(DateTime.DATETIME_FULL)}\n\n`;
+            
+            // Zaman Periyodu Karşılaştırması
+            csvContent += "ZAMAN PERİYODU KARŞILAŞTIRMASI\n";
+            csvContent += "Periyot,Kar (₺),Ciro (₺),Maliyet (₺)\n";
+            csvContent += `Günlük,${timePeriodData.day.profit},${timePeriodData.day.revenue},${timePeriodData.day.cost}\n`;
+            csvContent += `Haftalık,${timePeriodData.week.profit},${timePeriodData.week.revenue},${timePeriodData.week.cost}\n`;
+            csvContent += `Aylık,${timePeriodData.month.profit},${timePeriodData.month.revenue},${timePeriodData.month.cost}\n`;
+            csvContent += `Yıllık,${timePeriodData.year.profit},${timePeriodData.year.revenue},${timePeriodData.year.cost}\n\n`;
+            
+            // Performans Metrikleri
+            csvContent += "PERFORMANS METRİKLERİ\n";
+            csvContent += "Metrik,Değer\n";
+            csvContent += `Toplam Ciro,${document.getElementById('summary-revenue').textContent}\n`;
+            csvContent += `Toplam Maliyet,${document.getElementById('summary-cost').textContent}\n`;
+            csvContent += `Net Kar/Zarar,${document.getElementById('summary-profit').textContent}\n`;
+            csvContent += `Kar/Zarar Marjı,${document.getElementById('summary-margin').textContent}\n`;
+            csvContent += `Büyüme Oranı,${document.getElementById('growth-rate').textContent}\n`;
+            csvContent += `Verimlilik,${document.getElementById('efficiency').textContent}\n`;
+            csvContent += `Hedef Performans,${document.getElementById('target-performance').textContent}\n\n`;
+            
+            // Ürün Detayları
+            csvContent += "ÜRÜN DETAYLARI\n";
+            csvContent += "Ürün,Kategori,Adet,Satış Fiyatı (₺),Maliyet (₺),Adet Karı (₺),Toplam Kar (₺)\n";
+            
+            urunler.forEach(urun => {
+                const karAdet = urun.satisFiyati - urun.maliyet;
+                const toplamKar = karAdet * urun.adet;
+                csvContent += `${urun.ad},${urun.kategori},${urun.adet},${urun.satisFiyati},${urun.maliyet},${karAdet.toFixed(2)},${toplamKar.toFixed(2)}\n`;
+            });
+            
+            csvContent += "\nDİĞER HARCAMALAR\n";
+            csvContent += "Harcama Türü,Tutar (₺)\n";
+            csvContent += `Personel Giderleri,${otherExpenses.personel}\n`;
+            csvContent += `Kira Gideri,${otherExpenses.kira}\n`;
+            csvContent += `Elektrik/Su/Doğalgaz,${otherExpenses.enerji}\n`;
+            csvContent += `Nakliye/Dağıtım,${otherExpenses.nakliye}\n`;
+            csvContent += `Reklam/Pazarlama,${otherExpenses.reklam}\n`;
+            csvContent += `Bakım/Onarım,${otherExpenses.bakim}\n`;
+            csvContent += `Toplam Diğer Harcamalar,${Object.values(otherExpenses).reduce((a, b) => a + b, 0).toFixed(2)}\n`;
+            
+            // Tarihsel Veriler
+            csvContent += "\nTARİHSEL VERİLER (Son 7 Gün)\n";
+            csvContent += "Tarih,Kar (₺),Ciro (₺),Maliyet (₺)\n";
+            historicalData.daily.slice(-7).forEach(day => {
+                csvContent += `${day.date},${day.profit},${day.revenue},${day.cost}\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `restoran-analiz-${DateTime.now().toFormat('yyyy-MM-dd')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Excel/CSV raporu indirildi!', 'success');
+            closeModal();
+        }
+        
+        function downloadHTML() {
+            const now = DateTime.now();
+            const htmlContent = `
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Profesyonel Analiz Raporu - ${now.toFormat('dd/MM/yyyy')}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; color: #333; background: #f8fafc; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #2c3e50; padding-bottom: 30px; }
+        h1 { color: #2c3e50; font-size: 2.5rem; margin-bottom: 15px; }
+        .subtitle { color: #95a5a6; font-size: 1.2rem; }
+        .period-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 40px 0; }
+        .period-card { background: #f8f9fa; padding: 25px; border-radius: 10px; text-align: center; border-left: 5px solid #3498db; }
+        .period-title { font-weight: bold; color: #2c3e50; font-size: 1.1rem; margin-bottom: 15px; }
+        .period-value { font-size: 1.8rem; font-weight: 800; color: #2c3e50; margin-bottom: 10px; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px 0; }
+        .metric-card { background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 5px solid #27ae60; }
+        table { width: 100%; border-collapse: collapse; margin: 40px 0; }
+        th, td { border: 1px solid #ddd; padding: 15px; text-align: left; }
+        th { background-color: #2c3e50; color: white; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .profit-positive { color: #27ae60; font-weight: bold; }
+        .profit-negative { color: #e74c3c; font-weight: bold; }
+        .footer { margin-top: 40px; text-align: center; color: #95a5a6; font-size: 0.9em; border-top: 2px solid #eee; padding-top: 30px; }
+        .highlight { background: #fff9e6; padding: 20px; border-radius: 10px; border-left: 5px solid #f39c12; margin: 30px 0; }
+        .risk-level { display: inline-block; padding: 10px 20px; border-radius: 20px; font-weight: bold; margin: 10px 0; }
+        .risk-low { background: #27ae60; color: white; }
+        .risk-medium { background: #f39c12; color: white; }
+        .risk-high { background: #e74c3c; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RESTORAN PROFESYONEL ANALİZ RAPORU</h1>
+            <p class="subtitle">${now.toLocaleString(DateTime.DATETIME_FULL)}</p>
+        </div>
+        
+        <div class="period-grid">
+            <div class="period-card">
+                <div class="period-title">GÜNLÜK KAR</div>
+                <div class="period-value">${timePeriodData.day.profit.toFixed(2)} ₺</div>
+            </div>
+            <div class="period-card">
+                <div class="period-title">HAFTALIK KAR</div>
+                <div class="period-value">${timePeriodData.week.profit.toFixed(2)} ₺</div>
+            </div>
+            <div class="period-card">
+                <div class="period-title">AYLIK KAR</div>
+                <div class="period-value">${timePeriodData.month.profit.toFixed(2)} ₺</div>
+            </div>
+            <div class="period-card">
+                <div class="period-title">YILLIK KAR</div>
+                <div class="period-value">${timePeriodData.year.profit.toFixed(2)} ₺</div>
+            </div>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="period-title">TOPLAM CİRO</div>
+                <div class="period-value">${document.getElementById('summary-revenue').textContent}</div>
+            </div>
+            <div class="metric-card">
+                <div class="period-title">NET KAR/ZARAR</div>
+                <div class="period-value ${parseFloat(document.getElementById('summary-profit').textContent) >= 0 ? 'profit-positive' : 'profit-negative'}">
+                    ${document.getElementById('summary-profit').textContent}
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="period-title">KAR MARJI</div>
+                <div class="period-value">${document.getElementById('summary-margin').textContent}</div>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h3>PERFORMANS DEĞERLENDİRMESİ</h3>
+            <p><strong>Büyüme Oranı:</strong> ${document.getElementById('growth-rate').textContent}</p>
+            <p><strong>Verimlilik:</strong> ${document.getElementById('efficiency').textContent}</p>
+            <p><strong>Hedef Performans:</strong> ${document.getElementById('target-performance').textContent}</p>
+            <div class="risk-level ${document.getElementById('risk-level').textContent.includes('DÜŞÜK') ? 'risk-low' : document.getElementById('risk-level').textContent.includes('ORTA') ? 'risk-medium' : 'risk-high'}">
+                ${document.getElementById('risk-level').textContent}
+            </div>
+        </div>
+        
+        <h2>ÜRÜN PERFORMANS ANALİZİ</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ürün</th>
+                    <th>Kategori</th>
+                    <th>Adet</th>
+                    <th>Satış Fiyatı (₺)</th>
+                    <th>Maliyet (₺)</th>
+                    <th>Adet Karı (₺)</th>
+                    <th>Toplam Kar (₺)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${urunler.map(urun => {
+                    const karAdet = urun.satisFiyati - urun.maliyet;
+                    const toplamKar = karAdet * urun.adet;
+                    return `
+                    <tr>
+                        <td>${urun.ad}</td>
+                        <td>${urun.kategori}</td>
+                        <td>${urun.adet}</td>
+                        <td>${urun.satisFiyati} ₺</td>
+                        <td>${urun.maliyet} ₺</td>
+                        <td class="${karAdet >= 0 ? 'profit-positive' : 'profit-negative'}">${karAdet.toFixed(2)} ₺</td>
+                        <td class="${toplamKar >= 0 ? 'profit-positive' : 'profit-negative'}">${toplamKar.toFixed(2)} ₺</td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+        
+        <h2>DİĞER HARCAMALAR</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Harcama Türü</th>
+                    <th>Tutar (₺)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Personel Giderleri</td><td>${otherExpenses.personel} ₺</td></tr>
+                <tr><td>Kira Gideri</td><td>${otherExpenses.kira} ₺</td></tr>
+                <tr><td>Elektrik/Su/Doğalgaz</td><td>${otherExpenses.enerji} ₺</td></tr>
+                <tr><td>Nakliye/Dağıtım</td><td>${otherExpenses.nakliye} ₺</td></tr>
+                <tr><td>Reklam/Pazarlama</td><td>${otherExpenses.reklam} ₺</td></tr>
+                <tr><td>Bakım/Onarım</td><td>${otherExpenses.bakim} ₺</td></tr>
+                <tr style="font-weight: bold; background-color: #f8f9fa;">
+                    <td>Toplam Diğer Harcamalar</td>
+                    <td>${Object.values(otherExpenses).reduce((a, b) => a + b, 0).toFixed(2)} ₺</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <p>© ${now.year} Restoran Kar/Zarar Analiz Sistemi - Profesyonel Edition</p>
+            <p>Bu rapor profesyonel analiz sistemi tarafından otomatik olarak oluşturulmuştur.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+            
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `restoran-profesyonel-rapor-${now.toFormat('yyyy-MM-dd')}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showNotification('HTML raporu indirildi!', 'success');
+            closeModal();
+        }
+        
+        function downloadQuickPDF() {
+            downloadPDF();
+        }
+        
+        function downloadComparisonReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            const now = DateTime.now();
+            
+            // Başlık
+            doc.setFontSize(22);
+            doc.setTextColor(44, 62, 80);
+            doc.text('ZAMAN PERİYODU KARŞILAŞTIRMA RAPORU', 150, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(149, 165, 166);
+            doc.text(`Rapor Tarihi: ${now.toLocaleString(DateTime.DATETIME_FULL)}`, 150, 30, { align: 'center' });
+            
+            // Karşılaştırma Tablosu
+            doc.setFontSize(16);
+            doc.setTextColor(44, 62, 80);
+            doc.text('PERİYOT BAZINDA PERFORMANS KARŞILAŞTIRMASI', 20, 50);
+            
+            const comparisonData = [
+                ['Periyot', 'Kar (₺)', 'Ciro (₺)', 'Maliyet (₺)', 'Kar Marjı (%)'],
+                ['Günlük', timePeriodData.day.profit, timePeriodData.day.revenue, timePeriodData.day.cost, 
+                 timePeriodData.day.revenue > 0 ? (timePeriodData.day.profit / timePeriodData.day.revenue * 100).toFixed(1) : '0.0'],
+                ['Haftalık', timePeriodData.week.profit, timePeriodData.week.revenue, timePeriodData.week.cost,
+                 timePeriodData.week.revenue > 0 ? (timePeriodData.week.profit / timePeriodData.week.revenue * 100).toFixed(1) : '0.0'],
+                ['Aylık', timePeriodData.month.profit, timePeriodData.month.revenue, timePeriodData.month.cost,
+                 timePeriodData.month.revenue > 0 ? (timePeriodData.month.profit / timePeriodData.month.revenue * 100).toFixed(1) : '0.0'],
+                ['Yıllık', timePeriodData.year.profit, timePeriodData.year.revenue, timePeriodData.year.cost,
+                 timePeriodData.year.revenue > 0 ? (timePeriodData.year.profit / timePeriodData.year.revenue * 100).toFixed(1) : '0.0']
+            ];
+            
+            doc.autoTable({
+                startY: 60,
+                head: [comparisonData[0]],
+                body: comparisonData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [52, 152, 219] },
+                columnStyles: {
+                    0: { cellWidth: 40 },
+                    1: { cellWidth: 35, halign: 'right' },
+                    2: { cellWidth: 35, halign: 'right' },
+                    3: { cellWidth: 35, halign: 'right' },
+                    4: { cellWidth: 35, halign: 'right' }
+                }
+            });
+            
+            // Trend Analizi
+            const yPos = doc.autoTable.previous.finalY + 20;
+            doc.setFontSize(16);
+            doc.text('TREND ANALİZİ (Son 7 Gün)', 20, yPos);
+            
+            const trendData = historicalData.daily.slice(-7).map(day => [
+                day.date,
+                day.profit,
+                day.revenue,
+                day.cost
+            ]);
+            
+            doc.autoTable({
+                startY: yPos + 10,
+                head: [['Tarih', 'Kar (₺)', 'Ciro (₺)', 'Maliyet (₺)']],
+                body: trendData,
+                theme: 'grid',
+                headStyles: { fillColor: [46, 204, 113] }
+            });
+            
+            // Performans Özeti
+            const summaryYPos = doc.autoTable.previous.finalY + 20;
+            doc.setFontSize(16);
+            doc.text('PERFORMANS ÖZETİ', 20, summaryYPos);
+            
+            doc.setFontSize(10);
+            let currentY = summaryYPos + 10;
+            const summaryItems = [
+                ['En Karlı Ürün:', document.getElementById('most-profitable').textContent],
+                ['En Çok Satılan:', document.getElementById('most-sold').textContent],
+                ['Toplam Satılan Adet:', document.getElementById('total-units').textContent],
+                ['Ortalama Kar Marjı:', document.getElementById('avg-margin').textContent],
+                ['Büyüme Oranı:', document.getElementById('growth-rate').textContent],
+                ['Risk Seviyesi:', document.getElementById('risk-level').textContent]
+            ];
+            
+            summaryItems.forEach(([label, value]) => {
+                doc.text(label, 30, currentY);
+                doc.text(value, 150, currentY, { align: 'right' });
+                currentY += 8;
+            });
+            
+            // Sayfa numarası
+            const pageCount = doc.internal.getNumberOfPages();
+            for(let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(10);
+                doc.setTextColor(149, 165, 166);
+                doc.text(`Sayfa ${i} / ${pageCount}`, 150, 200, { align: 'center' });
+            }
+            
+            doc.save(`restoran-karsilastirma-raporu-${now.toFormat('yyyy-MM-dd')}.pdf`);
+            showNotification('Karşılaştırma raporu indirildi!', 'success');
+            closeModal();
+        }
+        
+        function generateDetailedReport() {
+            downloadPDF();
+        }
+        
+        function downloadComparisonChart() {
+            // Canvas'ı resim olarak indir
+            const canvas = document.getElementById('comparisonChart');
+            const link = document.createElement('a');
+            link.download = `restoran-karsilastirma-grafik-${DateTime.now().toFormat('yyyy-MM-dd')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            showNotification('Karşılaştırma grafiği indirildi!', 'success');
+        }
+        
+        // Bildirim göster
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            // 4 saniye sonra bildirimi gizle
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
