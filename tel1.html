@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telefon Sipariş Sistemi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 600;
+        }
+
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a1a2e 100%);
+            color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cccccc;
+            font-weight: 600;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .customers-list {
+            margin-top: 20px;
+        }
+
+        .customer-card {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .customer-name {
+            font-size: 1.2rem;
+            color: #3498db;
+            margin-bottom: 8px;
+        }
+
+        .customer-info {
+            margin-bottom: 5px;
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        .customer-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-print {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        /* Yazdırma için gizli içerik */
+        @media print {
+            body * {
+                visibility: hidden;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            #receipt-print,
+            #receipt-print * {
+                visibility: visible !important;
+            }
+
+            #receipt-print {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 80mm !important;
+                height: auto !important;
+                font-family: 'Courier New', monospace !important;
+                font-size: 12px !important;
+                line-height: 1.2 !important;
+                background: white !important;
+                color: black !important;
+                border: none !important;
+                padding: 5mm !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+            }
+        }
+
+        #receipt-print {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-phone"></i> Telefon Sipariş Sistemi</h1>
+            <p>Paşam Döner</p>
+        </header>
+
+        <!-- Sipariş Formu -->
+        <div class="form-section">
+            <form id="customer-form">
+                <div class="form-group">
+                    <label for="customer-name">Ad</label>
+                    <input type="text" id="customer-name" placeholder="Ad" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer-surname">Soyad</label>
+                    <input type="text" id="customer-surname" placeholder="Soyad" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer-phone">Telefon</label>
+                    <input type="tel" id="customer-phone" placeholder="Telefon" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer-address">Adres</label>
+                    <textarea id="customer-address" placeholder="Adres"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer-order">Sipariş Detayları</label>
+                    <textarea id="customer-order" placeholder="Sipariş detaylarını girin" required></textarea>
+                </div>
+
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Siparişi Kaydet
+                </button>
+            </form>
+        </div>
+
+        <!-- Kayıtlı Müşteriler -->
+        <div class="customers-list" id="customers-list">
+            <!-- Müşteriler buraya eklenecek -->
+        </div>
+
+        <!-- Fiş Yazdırma için Gizli Div -->
+        <div id="receipt-print"></div>
+    </div>
+
+    <script>
+        // Müşterileri localStorage'da saklama
+        let customers = JSON.parse(localStorage.getItem('customers')) || [];
+
+        // Sayfa yüklendiğinde müşterileri göster
+        document.addEventListener('DOMContentLoaded', function() {
+            displayCustomers();
+            
+            // Form submit event'i
+            document.getElementById('customer-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addCustomer();
+            });
+        });
+
+        // Müşteri ekle
+        function addCustomer() {
+            const name = document.getElementById('customer-name').value.trim();
+            const surname = document.getElementById('customer-surname').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+            const address = document.getElementById('customer-address').value.trim();
+            const order = document.getElementById('customer-order').value.trim();
+
+            if (!name || !surname || !phone || !order) {
+                alert('Lütfen tüm zorunlu alanları doldurun!');
+                return;
+            }
+
+            const customer = {
+                id: Date.now(),
+                name: name,
+                surname: surname,
+                phone: phone,
+                address: address,
+                order: order,
+                date: new Date().toLocaleString('tr-TR')
+            };
+
+            customers.push(customer);
+            localStorage.setItem('customers', JSON.stringify(customers));
+
+            // Formu temizle
+            document.getElementById('customer-form').reset();
+
+            // Müşterileri yenile
+            displayCustomers();
+
+            alert('Sipariş başarıyla kaydedildi!');
+        }
+
+        // Müşterileri göster
+        function displayCustomers() {
+            const customersList = document.getElementById('customers-list');
+            
+            if (customers.length === 0) {
+                customersList.innerHTML = '<p style="text-align: center; color: #777; margin-top: 20px;">Henüz kayıtlı sipariş yok.</p>';
+                return;
+            }
+
+            let html = '';
+            customers.forEach(customer => {
+                html += `
+                    <div class="customer-card">
+                        <div class="customer-name">${customer.name} ${customer.surname}</div>
+                        <div class="customer-info"><i class="fas fa-phone"></i> ${customer.phone}</div>
+                        <div class="customer-info"><i class="fas fa-map-marker-alt"></i> ${customer.address || 'Adres belirtilmemiş'}</div>
+                        <div class="customer-info"><i class="fas fa-shopping-cart"></i> ${customer.order}</div>
+                        <div class="customer-info"><i class="fas fa-calendar-alt"></i> ${customer.date}</div>
+                        <div class="customer-actions">
+                            <button class="action-btn btn-print" onclick="printReceipt(${customer.id})">
+                                <i class="fas fa-print"></i> Fiş Yazdır
+                            </button>
+                            <button class="action-btn btn-delete" onclick="deleteCustomer(${customer.id})">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            customersList.innerHTML = html;
+        }
+
+        // Müşteri sil
+        function deleteCustomer(id) {
+            if (confirm('Bu siparişi silmek istediğinize emin misiniz?')) {
+                customers = customers.filter(customer => customer.id !== id);
+                localStorage.setItem('customers', JSON.stringify(customers));
+                displayCustomers();
+            }
+        }
+
+        // YAZDIRMA FONKSİYONU - YÖNETİM PANELİNDEKİ GİBİ
+        function printReceipt(customerId) {
+            const customer = customers.find(c => c.id === customerId);
+            
+            if (!customer) {
+                alert('Sipariş bulunamadı!');
+                return;
+            }
+
+            const orderDate = new Date(customer.date);
+            const dateString = orderDate.toLocaleDateString('tr-TR');
+            const timeString = orderDate.toLocaleTimeString('tr-TR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+
+            let receiptContent = `
+                <div style="font-family: 'Courier New', monospace; width: 100%; padding: 5mm; font-size: 12px; line-height: 1.2; color: black;">
+                    <div style="text-align: center; margin-bottom: 5px;">
+                        <div style="font-size: 14px; font-weight: bold;">PAŞAM DÖNER</div>
+                        <div style="font-size: 12px;">Telefon Siparişi</div>
+                    </div>
+                    <hr style="border-top: 2px solid black; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                        <span>Tarih:</span>
+                        <span>${dateString}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                        <span>Saat:</span>
+                        <span>${timeString}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Sipariş No:</span>
+                        <span>#${customer.id}</span>
+                    </div>
+                    <hr style="border-top: 1px dashed black; margin: 5px 0;">
+                    <div style="margin-bottom: 5px;">
+                        <div style="font-weight: bold;">MÜŞTERİ BİLGİLERİ:</div>
+                        <div style="margin-left: 5px;">
+                            <div><strong>Ad:</strong> ${customer.name}</div>
+                            <div><strong>Soyad:</strong> ${customer.surname}</div>
+                            <div><strong>Telefon:</strong> ${customer.phone}</div>
+            `;
+
+            // Adres varsa ekle
+            if (customer.address && customer.address.trim() !== '') {
+                receiptContent += `<div><strong>Adres:</strong> ${customer.address}</div>`;
+            }
+
+            // Kayıt tarihi
+            receiptContent += `<div><strong>Kayıt Tarihi:</strong> ${customer.date}</div>`;
+
+            // Sipariş detayları
+            receiptContent += `
+                        </div>
+                    </div>
+                    <hr style="border-top: 1px dashed black; margin: 5px 0;">
+                    <div style="margin-bottom: 5px;">
+                        <div style="font-weight: bold;">SİPARİŞ DETAYLARI:</div>
+                        <div style="margin-left: 5px; white-space: pre-line;">${customer.order}</div>
+                    </div>
+                    <hr style="border-top: 1px dashed black; margin: 5px 0;">
+                    <div style="text-align: center; font-weight: bold; margin-top: 5px;">
+                        <div>*** TEŞEKKÜR EDERİZ ***</div>
+                        <div>Sipariş No: ${customer.id}</div>
+                        <div>${dateString} ${timeString}</div>
+                    </div>
+                </div>
+            `;
+
+            const receiptPrint = document.getElementById('receipt-print');
+            receiptPrint.innerHTML = receiptContent;
+            receiptPrint.style.display = 'block';
+
+            // Yazdırma işlemi
+            setTimeout(() => {
+                window.print();
+                
+                // Yazdırma sonrası temizle
+                setTimeout(() => {
+                    receiptPrint.style.display = 'none';
+                    receiptPrint.innerHTML = '';
+                }, 500);
+            }, 100);
+        }
+    </script>
+</body>
+
+</html>
