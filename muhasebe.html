@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Kar-Zarar Analiz Sistemi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #17a2b8;
+            --light-bg: #ecf0f1;
+            --dark-bg: #2c3e50;
+            --text-color: #333;
+            --text-light: #7f8c8d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a252f 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--secondary-color);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            padding: 25px;
+        }
+
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Kartlar */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--secondary-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form Elemanları */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* Butonlar */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1f639c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #219653 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #219653 0%, #1e8449 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info-color) 0%, #138496 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        /* Ürün Listesi */
+        .product-list {
+            margin-top: 15px;
+        }
+
+        .product-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--success-color);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .product-item:hover {
+            background: #e8f4fc;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(52, 152, 219, 0.1);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .product-details {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .product-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-input-group label {
+            flex: 0 0 150px;
+            margin-bottom: 0;
+        }
+
+        .product-input-group input {
+            flex: 1;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* İstatistik Kartları */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-top: 4px solid transparent;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.profit { border-color: var(--success-color); }
+        .stat-card.loss { border-color: var(--danger-color); }
+        .stat-card.neutral { border-color: var(--info-color); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profit .stat-value { color: var(--success-color); }
+        .loss .stat-value { color: var(--danger-color); }
+        .neutral .stat-value { color: var(--info-color); }
+
+        /* Giderler Grid */
+        .expenses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        /* Tarih Karşılaştırma */
+        .date-comparison {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .comparison-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .comparison-result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .comparison-period {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .comparison-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .comparison-change {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .change-positive {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+        }
+
+        .change-negative {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+        }
+
+        .change-neutral {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--secondary-color);
+        }
+
+        /* Kayıt Listesi */
+        .records-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding-right: 10px;
+        }
+
+        .record-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--info-color);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .record-item:hover {
+            background: #e8f4fc;
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .record-date {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .record-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .record-profit { color: var(--success-color); }
+        .record-loss { color: var(--danger-color); }
+
+        .record-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 15px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .record-details.active {
+            max-height: 500px;
+            padding: 15px;
+        }
+
+        .record-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: var(--text-color);
+        }
+
+        /* Footer Butonları */
+        .footer-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 25px;
+            background: var(--light-bg);
+            border-top: 1px solid #ddd;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .product-input-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .product-input-group label {
+                flex: 0 0 auto;
+            }
+            
+            .footer-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        /* Animasyonlar */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide {
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        /* Badge */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .badge-danger {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .badge-info {
+            background: rgba(23, 162, 184, 0.1);
+            color: var(--info-color);
+            border: 1px solid rgba(23, 162, 184, 0.3);
+        }
+
+        /* Auto Save Indicator */
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .auto-save-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Restoran Kar-Zarar Analiz Sistemi</h1>
+            <p>Gerçek zamanlı analiz ve detaylı kayıt takibi</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sol Kolon -->
+            <div class="left-column">
+                <!-- Ürün Ekleme Kartı -->
+                <div class="card animate-slide">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-plus-circle"></i> Yeni Ürün Ekle</h2>
+                        <span class="auto-save-indicator" id="autoSaveIndicator">
+                            <i class="fas fa-sync-alt fa-spin"></i> Kaydediliyor...
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="productName">Ürün Adı</label>
+                        <input type="text" id="productName" placeholder="Örn: Tavuk Döner" maxlength="50" 
+                               onkeypress="if(event.key === 'Enter') addProduct()">
+                    </div>
+                    <button class="btn btn-success" onclick="addProduct()">
+                        <i class="fas fa-plus"></i> Ürün Ekle
+                    </button>
+                </div>
+
+                <!-- Ürün Listesi Kartı -->
+                <div class="card animate-slide" style="animation-delay: 0.1s;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-list"></i> Ürün Listesi</h2>
+                        <span class="badge badge-info" id="productCount">0 ürün</span>
+                    </div>
+                    <div class="product-list" id="productList">
+                        <!-- Ürünler buraya eklenecek -->
+                    </div>
+                </div>
+
+                <!-- Giderler Kartı -->
+                <div class="card animate-slide" style="animation-delay: 0.2s;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-money-bill-wave"></i> Ek Giderler ve Kazançlar</h2>
+                    </div>
+                    <div class="expenses-grid">
+                        <div class="form-group">
+                            <label for="personelCost">Personel Gideri (₺)</label>
+                            <input type="number" id="personelCost" placeholder="0.00" min="0" step="0.01" 
+                                   oninput="updateExpenses()">
+                        </div>
+                        <div class="form-group">
+                            <label for="rentCost">Kira Gideri (₺)</label>
+                            <input type="number" id="rentCost" placeholder="0.00" min="0" step="0.01" 
+                                   oninput="updateExpenses()">
+                        </div>
+                        <div class="form-group">
+                            <label for="electricityCost">Elektrik Gideri (₺)</label>
+                            <input type="number" id="electricityCost" placeholder="0.00" min="0" step="0.01" 
+                                   oninput="updateExpenses()">
+                        </div>
+                        <div class="form-group">
+                            <label for="waterCost">Su Gideri (₺)</label>
+                            <input type="number" id="waterCost" placeholder="0.00" min="0" step="0.01" 
+                                   oninput="updateExpenses()">
+                        </div>
+                        <div class="form-group">
+                            <label for="otherCosts">Diğer Giderler (₺)</label>
+                            <input type="number" id="otherCosts" placeholder="0.00" min="0" step="0.01" 
+                                   oninput="updateExpenses()">
+                        </div>
+                        <div class="form-group">
+                            <label for="extraIncome">Ek Kazanç (₺)</label>
+                            <input type="number" id="extraIncome" placeholder="0.00" min="0" step="0.01" 
+                                   oninput="updateExpenses()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Kolon -->
+            <div class="right-column">
+                <!-- İstatistikler Kartı -->
+                <div class="card animate-slide" style="animation-delay: 0.3s;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-bar"></i> Gerçek Zamanlı Finansal Analiz</h2>
+                        <span id="lastUpdate" style="font-size: 0.8rem; color: var(--text-light);">
+                            Son güncelleme: Şimdi
+                        </span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card profit">
+                            <div class="stat-label">Toplam Gelir</div>
+                            <div class="stat-value" id="totalRevenue">0 ₺</div>
+                            <div><i class="fas fa-arrow-up"></i> Satışlardan</div>
+                        </div>
+                        <div class="stat-card loss">
+                            <div class="stat-label">Toplam Gider</div>
+                            <div class="stat-value" id="totalExpense">0 ₺</div>
+                            <div><i class="fas fa-arrow-down"></i> Tüm giderler</div>
+                        </div>
+                        <div class="stat-card neutral">
+                            <div class="stat-label">Net Kar/Zarar</div>
+                            <div class="stat-value" id="netProfit">0 ₺</div>
+                            <div id="profitStatus">Hesaplanıyor...</div>
+                        </div>
+                        <div class="stat-card neutral">
+                            <div class="stat-label">Kar Marjı</div>
+                            <div class="stat-value" id="profitMargin">0%</div>
+                            <div>Toplam gelire oran</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kayıtlar ve Karşılaştırma Kartı -->
+                <div class="card animate-slide" style="animation-delay: 0.5s;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-history"></i> Detaylı Geçmiş Kayıtlar ve Karşılaştırma</h2>
+                        <button class="btn btn-success" onclick="saveDailyRecord()">
+                            <i class="fas fa-save"></i> Kayıt Oluştur
+                        </button>
+                    </div>
+
+                    <!-- Tarih Karşılaştırma Bölümü -->
+                    <div class="date-comparison">
+                        <div class="comparison-header">
+                            <h3 style="color: var(--primary-color); margin: 0;">
+                                <i class="fas fa-balance-scale"></i> Tarih Karşılaştırması
+                            </h3>
+                            <button class="btn btn-info btn-sm" onclick="runComparison()">
+                                <i class="fas fa-play"></i> Karşılaştır
+                            </button>
+                        </div>
+
+                        <div class="comparison-controls">
+                            <div class="form-group">
+                                <label for="comparisonStartDate">Başlangıç Tarihi</label>
+                                <input type="date" id="comparisonStartDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="comparisonEndDate">Bitiş Tarihi</label>
+                                <input type="date" id="comparisonEndDate">
+                            </div>
+                        </div>
+
+                        <!-- Karşılaştırma Sonuçları -->
+                        <div class="comparison-results" id="comparisonResults">
+                            <!-- Karşılaştırma sonuçları buraya eklenecek -->
+                        </div>
+                    </div>
+
+                    <!-- Kayıt Listesi -->
+                    <div class="records-list" id="recordsList">
+                        <!-- Kayıtlar buraya eklenecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global değişkenler
+        let products = [];
+        let expenses = {
+            personelCost: 0,
+            rentCost: 0,
+            electricityCost: 0,
+            waterCost: 0,
+            otherCosts: 0,
+            extraIncome: 0
+        };
+        let dailyRecords = [];
+        let autoSaveTimer = null;
+        let lastUpdateTime = new Date();
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tarihleri ayarla (bugün ve 1 ay önce)
+            const today = new Date();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            
+            // Karşılaştırma tarihlerini ayarla
+            document.getElementById('comparisonStartDate').valueAsDate = oneMonthAgo;
+            document.getElementById('comparisonEndDate').valueAsDate = today;
+            
+            // Verileri yükle
+            loadData();
+            // Analizi güncelle
+            updateAnalysis();
+            // Karşılaştırmayı çalıştır
+            runComparison();
+            
+            // Auto-save mesajını gizle
+            setTimeout(() => {
+                hideAutoSaveIndicator();
+            }, 2000);
+        });
+
+        // Otomatik kayıt göstergesi
+        function showAutoSaveIndicator() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.classList.add('show');
+            
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                hideAutoSaveIndicator();
+            }, 1500);
+        }
+
+        function hideAutoSaveIndicator() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.classList.remove('show');
+        }
+
+        // Son güncelleme zamanını güncelle
+        function updateLastUpdateTime() {
+            lastUpdateTime = new Date();
+            const timeStr = lastUpdateTime.toLocaleTimeString('tr-TR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = `Son güncelleme: ${timeStr}`;
+        }
+
+        // Ürün ekleme fonksiyonu
+        function addProduct() {
+            const name = document.getElementById('productName').value.trim();
+            
+            if (!name) {
+                showNotification('Lütfen ürün adı giriniz!', 'warning');
+                return;
+            }
+            
+            // Aynı isimde ürün kontrolü
+            if (products.some(product => product.name.toLowerCase() === name.toLowerCase())) {
+                showNotification('Bu isimde bir ürün zaten var!', 'warning');
+                return;
+            }
+            
+            const product = {
+                id: Date.now(),
+                name: name,
+                unitCost: 0,
+                unitPrice: 0,
+                soldQuantity: 0,
+                addedDate: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            };
+            
+            products.push(product);
+            saveDataWithAutoSave();
+            renderProductList();
+            updateAnalysis();
+            
+            // Formu temizle
+            document.getElementById('productName').value = '';
+            
+            // Başarılı mesajı
+            showNotification(`${name} ürünü başarıyla eklendi!`, 'success');
+        }
+
+        // Ürün listesini render et
+        function renderProductList() {
+            const productList = document.getElementById('productList');
+            const productCount = document.getElementById('productCount');
+            
+            productList.innerHTML = '';
+            
+            if (products.length === 0) {
+                productList.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #7f8c8d;">
+                        <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>Henüz ürün eklenmemiş</p>
+                    </div>
+                `;
+                productCount.textContent = '0 ürün';
+                return;
+            }
+            
+            products.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.className = 'product-item';
+                productElement.innerHTML = `
+                    <div class="product-header">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <div class="product-input-group">
+                            <label for="cost-${product.id}">Birim Maliyet (₺):</label>
+                            <input type="number" id="cost-${product.id}" value="${product.unitCost}" 
+                                   min="0" step="0.01" oninput="updateProductField(${product.id}, 'unitCost', this.value)">
+                        </div>
+                        <div class="product-input-group">
+                            <label for="price-${product.id}">Birim Fiyat (₺):</label>
+                            <input type="number" id="price-${product.id}" value="${product.unitPrice}" 
+                                   min="0" step="0.01" oninput="updateProductField(${product.id}, 'unitPrice', this.value)">
+                        </div>
+                        <div class="product-input-group">
+                            <label for="quantity-${product.id}">Satılan Adet:</label>
+                            <input type="number" id="quantity-${product.id}" value="${product.soldQuantity}" 
+                                   min="0" step="1" oninput="updateProductField(${product.id}, 'soldQuantity', this.value)">
+                        </div>
+                    </div>
+                `;
+                productList.appendChild(productElement);
+            });
+            
+            productCount.textContent = `${products.length} ürün`;
+        }
+
+        // Ürün alanlarını güncelle
+        function updateProductField(productId, field, value) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                if (field === 'soldQuantity') {
+                    product[field] = parseInt(value) || 0;
+                } else {
+                    product[field] = parseFloat(value) || 0;
+                }
+                product.lastUpdated = new Date().toISOString();
+                saveDataWithAutoSave();
+                updateAnalysis();
+            }
+        }
+
+        // Ürün silme fonksiyonu
+        function deleteProduct(id) {
+            if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+                products = products.filter(product => product.id !== id);
+                saveDataWithAutoSave();
+                renderProductList();
+                updateAnalysis();
+                showNotification('Ürün başarıyla silindi!', 'warning');
+            }
+        }
+
+        // Giderleri güncelleme fonksiyonu
+        function updateExpenses() {
+            expenses = {
+                personelCost: parseFloat(document.getElementById('personelCost').value) || 0,
+                rentCost: parseFloat(document.getElementById('rentCost').value) || 0,
+                electricityCost: parseFloat(document.getElementById('electricityCost').value) || 0,
+                waterCost: parseFloat(document.getElementById('waterCost').value) || 0,
+                otherCosts: parseFloat(document.getElementById('otherCosts').value) || 0,
+                extraIncome: parseFloat(document.getElementById('extraIncome').value) || 0
+            };
+            
+            saveDataWithAutoSave();
+            updateAnalysis();
+        }
+
+        // Analiz güncelleme fonksiyonu
+        function updateAnalysis() {
+            // Toplam gelir hesapla
+            let totalRevenue = products.reduce((sum, product) => {
+                return sum + (product.unitPrice * product.soldQuantity);
+            }, 0) + expenses.extraIncome;
+            
+            // Toplam maliyet hesapla
+            let totalCost = products.reduce((sum, product) => {
+                return sum + (product.unitCost * product.soldQuantity);
+            }, 0);
+            
+            // Toplam gider hesapla
+            const totalExpense = totalCost + 
+                expenses.personelCost + 
+                expenses.rentCost + 
+                expenses.electricityCost + 
+                expenses.waterCost + 
+                expenses.otherCosts;
+            
+            // Net kar/zarar hesapla
+            const netProfit = totalRevenue - totalExpense;
+            const profitMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : 0;
+            
+            // DOM güncelleme
+            document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)} ₺`;
+            document.getElementById('totalExpense').textContent = `${totalExpense.toFixed(2)} ₺`;
+            document.getElementById('netProfit').textContent = `${netProfit.toFixed(2)} ₺`;
+            document.getElementById('profitMargin').textContent = `${profitMargin}%`;
+            
+            const profitStatus = document.getElementById('profitStatus');
+            if (netProfit > 0) {
+                profitStatus.innerHTML = '<span class="badge badge-success">KARLILIK</span>';
+                document.getElementById('netProfit').parentElement.className = 'stat-card profit';
+            } else if (netProfit < 0) {
+                profitStatus.innerHTML = '<span class="badge badge-danger">ZARAR</span>';
+                document.getElementById('netProfit').parentElement.className = 'stat-card loss';
+            } else {
+                profitStatus.innerHTML = '<span class="badge badge-info">NÖTR</span>';
+                document.getElementById('netProfit').parentElement.className = 'stat-card neutral';
+            }
+            
+            updateLastUpdateTime();
+        }
+
+        // Tarih karşılaştırması yap
+        function runComparison() {
+            const startDate = document.getElementById('comparisonStartDate').value;
+            const endDate = document.getElementById('comparisonEndDate').value;
+            
+            if (!startDate || !endDate) {
+                showNotification('Lütfen tarih alanlarını doldurun!', 'warning');
+                return;
+            }
+            
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            
+            // Seçilen dönemdeki kayıtları filtrele
+            const periodRecords = dailyRecords.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate >= start && recordDate <= end;
+            });
+            
+            if (periodRecords.length === 0) {
+                document.getElementById('comparisonResults').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #7f8c8d;">
+                        <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Seçilen tarih aralığında kayıt bulunamadı</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Dönem istatistiklerini hesapla
+            const periodStats = calculatePeriodStats(periodRecords);
+            
+            // Sonuçları göster
+            displayComparisonResults(periodStats);
+            
+            showNotification('Tarih karşılaştırması tamamlandı!', 'success');
+        }
+
+        // Dönem istatistiklerini hesapla
+        function calculatePeriodStats(records) {
+            if (records.length === 0) {
+                return {
+                    totalRevenue: 0,
+                    totalExpense: 0,
+                    totalProfit: 0,
+                    avgMargin: 0,
+                    dayCount: 0,
+                    recordCount: 0,
+                    bestDay: null,
+                    worstDay: null
+                };
+            }
+            
+            const totalRevenue = records.reduce((sum, record) => sum + record.totalRevenue, 0);
+            const totalExpense = records.reduce((sum, record) => sum + record.totalExpense, 0);
+            const totalProfit = records.reduce((sum, record) => sum + record.netProfit, 0);
+            
+            // Ortalama kar marjı hesapla
+            const validRecords = records.filter(record => record.totalRevenue > 0);
+            const avgMargin = validRecords.length > 0 
+                ? (validRecords.reduce((sum, record) => {
+                    return sum + ((record.netProfit / record.totalRevenue) * 100);
+                }, 0) / validRecords.length)
+                : 0;
+            
+            // Benzersiz gün sayısı
+            const uniqueDays = new Set(records.map(record => record.date.split('T')[0])).size;
+            
+            // En iyi ve en kötü gün
+            let bestDay = records[0];
+            let worstDay = records[0];
+            
+            records.forEach(record => {
+                if (record.netProfit > bestDay.netProfit) {
+                    bestDay = record;
+                }
+                if (record.netProfit < worstDay.netProfit) {
+                    worstDay = record;
+                }
+            });
+            
+            return {
+                totalRevenue,
+                totalExpense,
+                totalProfit,
+                avgMargin: parseFloat(avgMargin.toFixed(1)),
+                dayCount: uniqueDays,
+                recordCount: records.length,
+                bestDay,
+                worstDay
+            };
+        }
+
+        // Karşılaştırma sonuçlarını göster
+        function displayComparisonResults(stats) {
+            const resultsContainer = document.getElementById('comparisonResults');
+            const bestDayDate = stats.bestDay ? new Date(stats.bestDay.date).toLocaleDateString('tr-TR') : '-';
+            const worstDayDate = stats.worstDay ? new Date(stats.worstDay.date).toLocaleDateString('tr-TR') : '-';
+            
+            resultsContainer.innerHTML = `
+                <div class="comparison-result-card">
+                    <div class="comparison-period">Toplam Kar/Zarar</div>
+                    <div class="comparison-value" style="color: ${stats.totalProfit >= 0 ? '#27ae60' : '#e74c3c'}">
+                        ${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit.toFixed(2)} ₺
+                    </div>
+                    <div>${stats.dayCount} günlük toplam</div>
+                    <div class="comparison-change ${stats.totalProfit >= 0 ? 'change-positive' : 'change-negative'}">
+                        ${stats.recordCount} kayıt
+                    </div>
+                </div>
+                
+                <div class="comparison-result-card">
+                    <div class="comparison-period">Toplam Gelir</div>
+                    <div class="comparison-value">
+                        ${stats.totalRevenue.toFixed(2)} ₺
+                    </div>
+                    <div>Ortalama günlük</div>
+                    <div class="comparison-change change-neutral">
+                        ${stats.dayCount > 0 ? (stats.totalRevenue / stats.dayCount).toFixed(2) : 0} ₺
+                    </div>
+                </div>
+                
+                <div class="comparison-result-card">
+                    <div class="comparison-period">Toplam Gider</div>
+                    <div class="comparison-value">
+                        ${stats.totalExpense.toFixed(2)} ₺
+                    </div>
+                    <div>Ortalama günlük</div>
+                    <div class="comparison-change change-neutral">
+                        ${stats.dayCount > 0 ? (stats.totalExpense / stats.dayCount).toFixed(2) : 0} ₺
+                    </div>
+                </div>
+                
+                <div class="comparison-result-card">
+                    <div class="comparison-period">Ort. Kar Marjı</div>
+                    <div class="comparison-value" style="color: ${stats.avgMargin >= 0 ? '#27ae60' : '#e74c3c'}">
+                        ${stats.avgMargin}%
+                    </div>
+                    <div>Dönem ortalaması</div>
+                    <div class="comparison-change ${stats.avgMargin >= 0 ? 'change-positive' : 'change-negative'}">
+                        ${stats.avgMargin >= 0 ? 'Kârlı' : 'Zarar'}
+                    </div>
+                </div>
+                
+                <div class="comparison-result-card">
+                    <div class="comparison-period">En İyi Gün</div>
+                    <div class="comparison-value" style="color: #27ae60">
+                        +${stats.bestDay ? stats.bestDay.netProfit.toFixed(2) : 0} ₺
+                    </div>
+                    <div>${bestDayDate}</div>
+                    <div class="comparison-change change-positive">
+                        ${stats.bestDay ? stats.bestDay.totalRevenue.toFixed(2) : 0} ₺ gelir
+                    </div>
+                </div>
+                
+                <div class="comparison-result-card">
+                    <div class="comparison-period">En Kötü Gün</div>
+                    <div class="comparison-value" style="color: #e74c3c">
+                        ${stats.worstDay && stats.worstDay.netProfit < 0 ? stats.worstDay.netProfit.toFixed(2) : 0} ₺
+                    </div>
+                    <div>${worstDayDate}</div>
+                    <div class="comparison-change change-negative">
+                        ${stats.worstDay ? stats.worstDay.totalRevenue.toFixed(2) : 0} ₺ gelir
+                    </div>
+                </div>
+            `;
+        }
+
+        // Günlük kayıt oluştur
+        function saveDailyRecord() {
+            // Toplam gelir hesapla
+            let totalRevenue = products.reduce((sum, product) => {
+                return sum + (product.unitPrice * product.soldQuantity);
+            }, 0) + expenses.extraIncome;
+            
+            // Toplam maliyet hesapla
+            let totalCost = products.reduce((sum, product) => {
+                return sum + (product.unitCost * product.soldQuantity);
+            }, 0);
+            
+            // Toplam gider hesapla
+            const totalExpense = totalCost + 
+                expenses.personelCost + 
+                expenses.rentCost + 
+                expenses.electricityCost + 
+                expenses.waterCost + 
+                expenses.otherCosts;
+            
+            // Net kar/zarar hesapla
+            const netProfit = totalRevenue - totalExpense;
+            
+            // Ürün detaylarını topla
+            const productDetails = products.map(product => ({
+                name: product.name,
+                unitCost: product.unitCost,
+                unitPrice: product.unitPrice,
+                soldQuantity: product.soldQuantity,
+                totalRevenue: product.unitPrice * product.soldQuantity,
+                totalCost: product.unitCost * product.soldQuantity,
+                profit: (product.unitPrice * product.soldQuantity) - (product.unitCost * product.soldQuantity)
+            }));
+            
+            const record = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                totalRevenue: totalRevenue,
+                totalExpense: totalExpense,
+                netProfit: netProfit,
+                productCount: products.length,
+                expenses: {...expenses},
+                productDetails: [...productDetails],
+                timestamp: new Date().toISOString()
+            };
+            
+            dailyRecords.unshift(record); // En başa ekle
+            saveDataWithAutoSave();
+            renderRecords();
+            
+            showNotification('Günlük kayıt başarıyla oluşturuldu!', 'success');
+        }
+
+        // Kayıtları render et
+        function renderRecords() {
+            const recordsList = document.getElementById('recordsList');
+            
+            recordsList.innerHTML = '';
+            
+            if (dailyRecords.length === 0) {
+                recordsList.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #7f8c8d;">
+                        <i class="fas fa-history" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>Henüz kayıt bulunamadı</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Son 50 kaydı göster
+            const recordsToShow = dailyRecords.slice(0, 50);
+            
+            recordsToShow.forEach((record, index) => {
+                const date = new Date(record.date);
+                const recordElement = document.createElement('div');
+                recordElement.className = 'record-item';
+                recordElement.innerHTML = `
+                    <div class="record-header">
+                        <div>
+                            <div class="record-date">${date.toLocaleDateString('tr-TR', { 
+                                weekday: 'long', 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            })}</div>
+                            <div style="font-size: 0.9rem; color: #7f8c8d;">
+                                ${record.productCount} ürün, ${record.totalRevenue.toFixed(2)} ₺ gelir
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="record-amount ${record.netProfit >= 0 ? 'record-profit' : 'record-loss'}">
+                                ${record.netProfit >= 0 ? '+' : ''}${record.netProfit.toFixed(2)} ₺
+                            </div>
+                            <button class="btn btn-info btn-sm" onclick="toggleRecordDetails(${record.id})">
+                                <i class="fas fa-info-circle"></i> Detay
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteRecord(${record.id})">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    </div>
+                    <div class="record-details" id="record-details-${record.id}">
+                        <h4 style="margin-bottom: 15px; color: var(--primary-color);">
+                            <i class="fas fa-info-circle"></i> Kayıt Detayları
+                        </h4>
+                        
+                        <div class="record-details-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Toplam Gelir</div>
+                                <div class="detail-value">${record.totalRevenue.toFixed(2)} ₺</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Toplam Gider</div>
+                                <div class="detail-value">${record.totalExpense.toFixed(2)} ₺</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Net Kar/Zarar</div>
+                                <div class="detail-value" style="color: ${record.netProfit >= 0 ? '#27ae60' : '#e74c3c'}">
+                                    ${record.netProfit >= 0 ? '+' : ''}${record.netProfit.toFixed(2)} ₺
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Kar Marjı</div>
+                                <div class="detail-value">
+                                    ${record.totalRevenue > 0 ? ((record.netProfit / record.totalRevenue) * 100).toFixed(1) : 0}%
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 style="margin: 20px 0 10px 0; color: var(--primary-color);">
+                            <i class="fas fa-boxes"></i> Ürün Detayları
+                        </h5>
+                        <div style="max-height: 200px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #eee; border-radius: 6px; padding: 10px;">
+                            ${record.productDetails.map(product => `
+                                <div style="display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem;">
+                                    <span style="font-weight: 500;">${product.name}</span>
+                                    <span>${product.soldQuantity} adet</span>
+                                    <span style="color: ${product.profit >= 0 ? '#27ae60' : '#e74c3c'}">
+                                        ${product.profit.toFixed(2)} ₺ kar
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <h5 style="margin: 20px 0 10px 0; color: var(--primary-color);">
+                            <i class="fas fa-receipt"></i> Gider Detayları
+                        </h5>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 0.85rem;">
+                            <div style="padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                <div style="color: var(--text-light);">Personel</div>
+                                <div>${record.expenses.personelCost.toFixed(2)} ₺</div>
+                            </div>
+                            <div style="padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                <div style="color: var(--text-light);">Kira</div>
+                                <div>${record.expenses.rentCost.toFixed(2)} ₺</div>
+                            </div>
+                            <div style="padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                <div style="color: var(--text-light);">Elektrik</div>
+                                <div>${record.expenses.electricityCost.toFixed(2)} ₺</div>
+                            </div>
+                            <div style="padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                <div style="color: var(--text-light);">Su</div>
+                                <div>${record.expenses.waterCost.toFixed(2)} ₺</div>
+                            </div>
+                            <div style="padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                <div style="color: var(--text-light);">Diğer</div>
+                                <div>${record.expenses.otherCosts.toFixed(2)} ₺</div>
+                            </div>
+                            <div style="padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                <div style="color: var(--text-light);">Ek Kazanç</div>
+                                <div style="color: #27ae60;">${record.expenses.extraIncome.toFixed(2)} ₺</div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: right; margin-top: 15px; font-size: 0.8rem; color: var(--text-light);">
+                            <i class="far fa-clock"></i> 
+                            ${new Date(record.timestamp).toLocaleTimeString('tr-TR', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                            })}
+                        </div>
+                    </div>
+                `;
+                recordsList.appendChild(recordElement);
+            });
+        }
+
+        // Kayıt silme fonksiyonu
+        function deleteRecord(recordId) {
+            if (confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
+                dailyRecords = dailyRecords.filter(record => record.id !== recordId);
+                saveDataWithAutoSave();
+                renderRecords();
+                runComparison(); // Karşılaştırmayı yenile
+                showNotification('Kayıt başarıyla silindi!', 'warning');
+            }
+        }
+
+        // Kayıt detaylarını aç/kapat
+        function toggleRecordDetails(recordId) {
+            const detailsElement = document.getElementById(`record-details-${recordId}`);
+            
+            if (detailsElement.classList.contains('active')) {
+                detailsElement.classList.remove('active');
+            } else {
+                // Diğer açık detayları kapat
+                document.querySelectorAll('.record-details.active').forEach(el => {
+                    if (el.id !== `record-details-${recordId}`) {
+                        el.classList.remove('active');
+                    }
+                });
+                
+                detailsElement.classList.add('active');
+            }
+        }
+
+        // Otomatik kayıt ile veri kaydet
+        function saveDataWithAutoSave() {
+            const data = {
+                products: products,
+                expenses: expenses,
+                dailyRecords: dailyRecords
+            };
+            localStorage.setItem('restaurantAnalysisData', JSON.stringify(data));
+            showAutoSaveIndicator();
+        }
+
+        // Verileri localStorage'dan yükle
+        function loadData() {
+            const savedData = localStorage.getItem('restaurantAnalysisData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                products = data.products || [];
+                expenses = data.expenses || {
+                    personelCost: 0,
+                    rentCost: 0,
+                    electricityCost: 0,
+                    waterCost: 0,
+                    otherCosts: 0,
+                    extraIncome: 0
+                };
+                dailyRecords = data.dailyRecords || [];
+                
+                // Formları doldur
+                document.getElementById('personelCost').value = expenses.personelCost || '';
+                document.getElementById('rentCost').value = expenses.rentCost || '';
+                document.getElementById('electricityCost').value = expenses.electricityCost || '';
+                document.getElementById('waterCost').value = expenses.waterCost || '';
+                document.getElementById('otherCosts').value = expenses.otherCosts || '';
+                document.getElementById('extraIncome').value = expenses.extraIncome || '';
+                
+                renderProductList();
+                renderRecords();
+            }
+        }
+
+        // Bildirim göster
+        function showNotification(message, type) {
+            // Basit bir bildirim sistemi
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'success' ? '#27ae60' : 
+                           type === 'warning' ? '#f39c12' : 
+                           type === 'danger' ? '#e74c3c' : '#3498db'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                  type === 'warning' ? 'exclamation-triangle' : 
+                                  type === 'danger' ? 'times-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Sayfa kapanırken verileri kaydet
+        window.addEventListener('beforeunload', saveDataWithAutoSave);
+
+        // Slide out animasyonu için CSS ekle
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+            
+            .fa-spin {
+                animation: fa-spin 1s infinite linear;
+            }
+            
+            @keyframes fa-spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
