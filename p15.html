@@ -2,681 +2,441 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paşam Döner - Sipariş Sistemi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paşam Döner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        body {
-            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a4a 100%);
-            color: #fff;
-            line-height: 1.6;
+        
+        html, body {
             min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 15px;
-        }
-
-        header {
-            background: linear-gradient(135deg, #0066ff 0%, #00ccff 50%, #0066ff 100%);
-            color: white;
-            padding: 25px 0;
-            text-align: center;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 25px rgba(0, 102, 255, 0.4);
-            position: relative;
             overflow: hidden;
-            border: 2px solid #00ccff;
+            position: fixed;
+            width: 100%;
         }
-
-        header::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
-            background-size: cover;
-        }
-
-        .blue-fire-text {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px #0066ff, 0 0 20px #0066ff, 0 0 30px #0066ff;
-            position: relative;
-            animation: blue-flicker 1.5s infinite alternate;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
-        @keyframes blue-flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% {
-                text-shadow: 0 0 10px #0066ff, 0 0 20px #0066ff, 0 0 30px #0066ff, 0 0 40px #0066ff;
-            }
-            20%, 24%, 55% {
-                text-shadow: 0 0 5px #0066ff, 0 0 10px #0066ff, 0 0 15px #0066ff, 0 0 20px #0066ff;
-            }
-        }
-
-        header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            position: relative;
-            font-weight: 500;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-        }
-
-        .menu-section {
-            background: linear-gradient(135deg, #1a1a4a 0%, #0f0f3a 100%);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            margin-bottom: 25px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 1px solid #2a2a6a;
-        }
-
-        .menu-section:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 102, 255, 0.2);
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: #00ccff;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #2a2a6a;
-            position: relative;
-            font-weight: 700;
-        }
-
-        .section-title::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(to right, #0066ff, #00ccff);
-            border-radius: 3px;
-        }
-
-        .menu-items {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .menu-item {
-            background: linear-gradient(135deg, #2a2a6a 0%, #1a1a5a 100%);
-            border-radius: 12px;
-            padding: 18px;
+        
+        body {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid #3a3a7a;
-            position: relative;
-            overflow: hidden;
+            flex-direction: column;
+            touch-action: none;
         }
-
-        .menu-item::before {
-            content: "";
-            position: absolute;
+        
+        /* Arka plan resmi */
+        .background-container {
+            position: fixed;
             top: 0;
-            left: -100%;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 204, 255, 0.1), transparent);
-            transition: left 0.5s;
+            z-index: -1;
+            background-color: #f8e8a0;
         }
-
-        .menu-item:hover::before {
-            left: 100%;
+        
+        .background-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
         }
-
-        .menu-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 102, 255, 0.3);
-            border-color: #00ccff;
-        }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-name {
-            font-weight: 600;
-            font-size: 1.15rem;
-            color: #fff;
-        }
-
-        .item-price {
-            color: #00ccff;
-            font-weight: bold;
-            font-size: 1.3rem;
-            margin-top: 5px;
-            text-shadow: 0 0 5px rgba(0, 204, 255, 0.3);
-        }
-
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .quantity-btn {
-            background: linear-gradient(135deg, #0066ff 0%, #00ccff 100%);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.3rem;
+        
+        /* Butonlar konteyneri */
+        .buttons-container {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            padding: 0 15px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            transition: all 0.2s;
-            box-shadow: 0 4px 8px rgba(0, 102, 255, 0.4);
-            font-weight: bold;
+            gap: 10px;
+            z-index: 10;
+            flex-wrap: wrap;
         }
-
-        .quantity-btn:hover {
-            transform: scale(1.15);
-            box-shadow: 0 6px 12px rgba(0, 102, 255, 0.6);
-        }
-
-        .quantity {
-            font-size: 1.3rem;
-            font-weight: bold;
-            min-width: 40px;
-            text-align: center;
-            color: #fff;
-            text-shadow: 0 0 5px rgba(0, 204, 255, 0.5);
-        }
-
-        .notes-section textarea {
-            width: 100%;
-            height: 100px;
-            padding: 15px;
-            border: 2px solid #2a2a6a;
-            border-radius: 10px;
-            resize: vertical;
+        
+        /* Ortak buton stil */
+        .action-button {
+            padding: 12px 20px;
             font-size: 1rem;
-            transition: border 0.3s, box-shadow 0.3s;
-            background: #1a1a5a;
-            color: #fff;
-        }
-
-        .notes-section textarea:focus {
-            outline: none;
-            border-color: #00ccff;
-            box-shadow: 0 0 0 3px rgba(0, 204, 255, 0.2);
-        }
-
-        .table-section {
-            background: linear-gradient(135deg, #1a1a4a 0%, #0f0f3a 100%);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            margin-bottom: 25px;
-            border: 1px solid #2a2a6a;
-        }
-
-        .table-select {
-            width: 100%;
-            padding: 15px;
-            font-size: 1rem;
-            border: 2px solid #2a2a6a;
-            border-radius: 10px;
-            background: #1a1a5a;
-            transition: border 0.3s, box-shadow 0.3s;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .table-select:focus {
-            outline: none;
-            border-color: #00ccff;
-            box-shadow: 0 0 0 3px rgba(0, 204, 255, 0.2);
-        }
-
-        .order-summary {
-            background: linear-gradient(135deg, #1a1a4a 0%, #0f0f3a 100%);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            margin-bottom: 25px;
-            border: 2px solid #2a2a6a;
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #2a2a6a;
-            transition: background 0.2s;
-        }
-
-        .summary-item:hover {
-            background: rgba(0, 204, 255, 0.05);
-        }
-
-        .summary-total {
-            display: flex;
-            justify-content: space-between;
-            padding: 18px 0;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #00ccff;
-            border-top: 2px solid #2a2a6a;
-            margin-top: 15px;
-            text-shadow: 0 0 5px rgba(0, 204, 255, 0.3);
-        }
-
-        .order-time {
-            margin-top: 18px;
-            padding-top: 18px;
-            border-top: 2px dashed #2a2a6a;
-            font-style: italic;
-            color: #aaa;
-            text-align: center;
-            font-size: 1rem;
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, #0066ff 0%, #00ccff 100%);
-            color: white;
+            font-weight: 800;
             border: none;
-            padding: 18px 30px;
-            font-size: 1.3rem;
-            border-radius: 12px;
+            border-radius: 50px;
             cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            font-weight: bold;
-            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.5);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            min-width: 160px;
+            letter-spacing: 0.5px;
+            flex: 1;
+            max-width: 200px;
+            -webkit-user-select: none;
+            user-select: none;
         }
-
-        .submit-btn::before {
-            content: "";
+        
+        /* Sipariş ver butonu */
+        .order-button {
+            background-color: #ffd700;
+            color: #2c2c2c;
+        }
+        
+        .order-button:hover {
+            background-color: #e6c300;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Menü butonu */
+        .menu-button {
+            background-color: #8b4513;
+            color: white;
+        }
+        
+        .menu-button:hover {
+            background-color: #72380f;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Buton ikonları */
+        .button-icon {
+            font-size: 1rem;
+        }
+        
+        /* Logo/metin konteyneri */
+        .logo-container {
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .submit-btn:hover::before {
-            left: 100%;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 102, 255, 0.7);
-        }
-
-        footer {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
-            margin-top: 35px;
-            padding: 25px;
-            color: #888;
-            font-size: 0.95rem;
-            background: linear-gradient(135deg, #1a1a4a 0%, #0f0f3a 100%);
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid #2a2a6a;
+            width: 100%;
+            padding: 20px;
+            z-index: 2;
         }
-
-        @media (max-width: 768px) {
-            .menu-items {
-                grid-template-columns: 1fr;
+        
+        .logo-text {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .slogan {
+            color: #f8e8a0;
+            font-size: 1.4rem;
+            font-style: italic;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+            letter-spacing: 0.5px;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* MOBİL ÖNCELİKLİ TASARIM */
+        
+        /* Masaüstü için */
+        @media (min-width: 769px) {
+            .buttons-container {
+                top: 60px;
+                gap: 15px;
+                padding: 0 20px;
             }
             
-            .blue-fire-text {
-                font-size: 2.2rem;
+            .action-button {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                min-width: 200px;
+                max-width: none;
+                flex: none;
             }
             
-            .section-title {
-                font-size: 1.3rem;
+            .button-icon {
+                font-size: 1.2rem;
             }
             
-            .container {
-                padding: 10px;
+            .logo-text {
+                font-size: 3.5rem;
+            }
+            
+            .slogan {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* Tablet için */
+        @media (max-width: 768px) and (min-width: 481px) {
+            .buttons-container {
+                top: 45px;
+                gap: 12px;
+            }
+            
+            .action-button {
+                padding: 14px 22px;
+                font-size: 1.05rem;
+                min-width: 180px;
+            }
+            
+            .logo-text {
+                font-size: 3rem;
+            }
+            
+            .slogan {
+                font-size: 1.6rem;
+            }
+        }
+        
+        /* Telefon için */
+        @media (max-width: 480px) {
+            .buttons-container {
+                top: 35px;
+                gap: 8px;
+                padding: 0 10px;
+            }
+            
+            .action-button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                min-width: 140px;
+                max-width: 160px;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+                padding: 0 15px;
+            }
+            
+            .slogan {
+                font-size: 1.1rem;
+                padding: 0 15px;
+            }
+            
+            .button-icon {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Çok küçük ekranlar için */
+        @media (max-width: 360px) {
+            .buttons-container {
+                top: 30px;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .action-button {
+                width: 90%;
+                max-width: 250px;
+                min-width: auto;
+            }
+            
+            .logo-text {
+                font-size: 1.8rem;
+            }
+            
+            .slogan {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Yatay mod için */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .logo-container {
+                top: 45%;
+            }
+            
+            .buttons-container {
+                top: 20px;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+                margin-bottom: 5px;
+            }
+            
+            .slogan {
+                font-size: 1.2rem;
+            }
+            
+            .action-button {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Dokunmatik cihazlar için hover alternatifi */
+        @media (hover: none) {
+            .action-button:hover {
+                transform: none;
+            }
+            
+            .action-button:active {
+                transform: translateY(-3px);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1 class="blue-fire-text">🔥Paşam Döner 🔥</h1>
-            <p>Lezzetin En Güzel Hali</p>
-        </header>
+    <!-- Arka plan resmi -->
+    <div class="background-container">
+        <!-- Resim dinamik olarak yüklenecek -->
+        <img class="background-image" src="sari.jpg" alt="KADIRLI PASAM DÖNER Arka Plan" id="bg-image">
+    </div>
+    
 
-        <section class="menu-section">
-            <h2 class="section-title">Döner Çeşitlerimiz</h2>
-            <div class="menu-items">
-                <div class="menu-item">
-                    <div class="item-info">
-                        <div class="item-name">Tek Lavaş Döner</div>
-                        <div class="item-price">100 ₺</div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn minus" data-item="tek-doner">-</button>
-                        <span class="quantity" id="tek-doner-quantity">0</span>
-                        <button class="quantity-btn plus" data-item="tek-doner">+</button>
-                    </div>
-                </div>
-                
-                <div class="menu-item">
-                    <div class="item-info">
-                        <div class="item-name">Çift Lavaş Döner</div>
-                        <div class="item-price">110 ₺</div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn minus" data-item="cift-doner">-</button>
-                        <span class="quantity" id="cift-doner-quantity">0</span>
-                        <button class="quantity-btn plus" data-item="cift-doner">+</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="menu-section">
-            <h2 class="section-title">İçeceklerimiz</h2>
-            <div class="menu-items">
-                <div class="menu-item">
-                    <div class="item-info">
-                        <div class="item-name">Kola</div>
-                        <div class="item-price">40 ₺</div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn minus" data-item="kola">-</button>
-                        <span class="quantity" id="kola-quantity">0</span>
-                        <button class="quantity-btn plus" data-item="kola">+</button>
-                    </div>
-                </div>
-                
-                <div class="menu-item">
-                    <div class="item-info">
-                        <div class="item-name">Büyük Ayran</div>
-                        <div class="item-price">20 ₺</div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn minus" data-item="ayran">-</button>
-                        <span class="quantity" id="ayran-quantity">0</span>
-                        <button class="quantity-btn plus" data-item="ayran">+</button>
-                    </div>
-                </div>
-                
-                <div class="menu-item">
-                    <div class="item-info">
-                        <div class="item-name">Şalgam</div>
-                        <div class="item-price">20 ₺</div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn minus" data-item="salgam">-</button>
-                        <span class="quantity" id="salgam-quantity">0</span>
-                        <button class="quantity-btn plus" data-item="salgam">+</button>
-                    </div>
-                </div>
-                
-                <div class="menu-item">
-                    <div class="item-info">
-                        <div class="item-name">Su</div>
-                        <div class="item-price">10 ₺</div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn minus" data-item="su">-</button>
-                        <span class="quantity" id="su-quantity">0</span>
-                        <button class="quantity-btn plus" data-item="su">+</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="menu-section">
-            <h2 class="section-title">DÖNERİNİZ NASIL OLSUN 🙂?</h2>
-            <div class="notes-section">
-                <textarea id="order-notes" placeholder="Örneğin full olsun veya ketçap olmasın "></textarea>
-            </div>
-        </section>
-
-        <section class="table-section">
-            <h2 class="section-title">Masa Numaranızı Seçiniz</h2>
-            <select class="table-select" id="table-number">
-                <option value="">Masa numarası seçiniz</option>
-                <option value="Masa 1">Masa 1</option>
-                <option value="Masa 2">Masa 2</option>
-                <option value="Masa 3">Masa 3</option>
-                <option value="Masa 4">Masa 4</option>
-                <option value="Masa 5">Masa 5</option>
-                <option value="Masa 6">Masa 6</option>
-                <option value="Masa 7">Masa 7</option>
-                <option value="Masa 8">Masa 8</option>
-                <option value="Masa 9">Masa 9</option>
-                <option value="Masa 10">Masa 10</option>
-                <option value="Paket">Paket Sipariş</option>
-            </select>
-        </section>
-
-        <section class="order-summary">
-            <h2 class="section-title">Sipariş Özeti</h2>
-            <div id="summary-items">
-                <!-- Sipariş öğeleri JavaScript ile buraya eklenecek -->
-            </div>
-            <div class="summary-total">
-                <span>Toplam:</span>
-                <span id="total-price">0 ₺</span>
-            </div>
-            <div class="order-time" id="order-time">
-                <!-- Sipariş zamanı buraya eklenecek -->
-            </div>
-        </section>
-
-        <button class="submit-btn" id="submit-order">Siparişi Gönder</button>
-
-        
+    
+    <!-- Butonlar -->
+    <div class="buttons-container">
+        <a href="https://falanfilan.ct.ws/" target="_blank" class="action-button order-button" id="order-button">
+            <i class="fas fa-shopping-cart button-icon"></i>
+            SİPARİŞ VER
+        </a>
+        <a href="#" class="action-button menu-button" id="menu-button">
+            <i class="fas fa-utensils button-icon"></i>
+            ÜRÜNLERİMİZ
+        </a>
     </div>
 
     <script>
-        // Ürün fiyatları
-        const prices = {
-            'tek-doner': 100,
-            'cift-doner': 110,
-            'kola': 40,
-            'ayran': 20,
-            'salgam': 20,
-            'su': 10
-        };
-
-        // Ürün isimleri
-        const productNames = {
-            'tek-doner': 'Tek Lavaş Döner',
-            'cift-doner': 'Çift Lavaş Döner',
-            'kola': 'Kola',
-            'ayran': 'Büyük Ayran',
-            'salgam': 'Şalgam',
-            'su': 'Su'
-        };
-
-        // Miktar değişkenleri
-        let quantities = {
-            'tek-doner': 0,
-            'cift-doner': 0,
-            'kola': 0,
-            'ayran': 0,
-            'salgam': 0,
-            'su': 0
-        };
-
-        // Miktar butonlarına tıklama olaylarını ekle
-        document.querySelectorAll('.quantity-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const item = this.getAttribute('data-item');
-                const isPlus = this.classList.contains('plus');
-                
-                if (isPlus) {
-                    quantities[item]++;
-                } else if (quantities[item] > 0) {
-                    quantities[item]--;
-                }
-                
-                // Miktarı güncelle
-                document.getElementById(`${item}-quantity`).textContent = quantities[item];
-                
-                // Sipariş özetini güncelle
-                updateOrderSummary();
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            const bgImage = document.getElementById('bg-image');
+            
+            // sari.jpg dosyasını arka plan olarak ayarla
+            bgImage.src = 'sari.jpg';
+            
+            // Resim yüklenemezse alternatif arka plan rengi
+            bgImage.onerror = function() {
+                document.querySelector('.background-container').style.backgroundColor = '#f8e8a0';
+                console.log('Arka plan resmi yüklenemedi, alternatif renk kullanılıyor.');
+            };
+            
+            // Menü butonuna tıklanınca
+            document.getElementById('menu-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Menü sayfası henüz hazır değil. Yakında hizmetinizde!');
             });
-        });
-
-        // Tarih ve saat bilgisini al
-        function getCurrentDateTime() {
-            const now = new Date();
-            const date = now.toLocaleDateString('tr-TR');
-            const time = now.toLocaleTimeString('tr-TR');
-            return `${date} ${time}`;
-        }
-
-        // Sipariş özetini güncelle
-        function updateOrderSummary() {
-            const summaryItems = document.getElementById('summary-items');
-            const orderTime = document.getElementById('order-time');
-            let total = 0;
-            let summaryHTML = '';
             
-            // Ürünleri ekle
-            for (const item in quantities) {
-                if (quantities[item] > 0) {
-                    const itemTotal = quantities[item] * prices[item];
-                    total += itemTotal;
+            // Sipariş butonuna tıklanınca - DOĞRUDAN YÖNLENDİRME
+            document.getElementById('order-button').addEventListener('click', function(e) {
+                // Sadece event dinleyici ekliyoruz, yönlendirme href ile yapılacak
+                console.log('Sipariş sayfasına yönlendiriliyor...');
+            });
+            
+            // Kaydırmayı engelleme fonksiyonu - BUTONLARA TIKLAMAYI ENGELLEMEYECEK ŞEKİLDE
+            function disableScroll() {
+                // Fare tekerleğini engelle
+                document.addEventListener('wheel', preventScroll, { passive: false });
+                document.addEventListener('mousewheel', preventScroll, { passive: false });
+                
+                // Dokunmatik kaydırmayı engelle (ancak butonlara tıklamaya izin ver)
+                document.addEventListener('touchmove', function(e) {
+                    // Butonlara veya linklere tıklanıyorsa kaydırmaya izin ver
+                    if (!e.target.closest('.action-button')) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                
+                // Klavye kaydırmayı engelle
+                document.addEventListener('keydown', preventKeyScroll);
+                
+                // Sayfayı en üste sabitle
+                window.scrollTo(0, 0);
+            }
+            
+            function preventScroll(e) {
+                // Butonlara tıklanıyorsa kaydırmaya izin ver
+                if (!e.target.closest('.action-button')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            
+            function preventKeyScroll(e) {
+                // Page Up, Page Down, Space, Arrow keys
+                if ([32, 33, 34, 37, 38, 39, 40].includes(e.keyCode)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            
+            // Kaydırmayı engellemeyi başlat
+            disableScroll();
+            
+            // Dokunmatik cihazlar için touch event'leri
+            const buttons = document.querySelectorAll('.action-button');
+            let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            // Butonlara tıklama efektleri ekle
+            buttons.forEach(button => {
+                if (!isTouchDevice) {
+                    // Dokunmatik olmayan cihazlar için hover efekti
+                    button.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-5px)';
+                    });
                     
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <span>${productNames[item]} (${quantities[item]} adet)</span>
-                            <span>${itemTotal} ₺</span>
-                        </div>
-                    `;
+                    button.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0)';
+                    });
+                } else {
+                    // Dokunmatik cihazlar için active efekti
+                    button.addEventListener('touchstart', function() {
+                        this.style.transform = 'translateY(-3px)';
+                        this.style.opacity = '0.9';
+                    });
+                    
+                    button.addEventListener('touchend', function() {
+                        this.style.transform = 'translateY(0)';
+                        this.style.opacity = '1';
+                    });
                 }
-            }
+                
+                // Butonlara tıklanınca kaydırma engelini kaldır (link çalışsın diye)
+                button.addEventListener('click', function(e) {
+                    // Sadece menü butonu için default'u engelle
+                    if (this.id === 'menu-button') {
+                        e.preventDefault();
+                        alert('Menü sayfası henüz hazır değil. Yakında hizmetinizde!');
+                    }
+                    // Sipariş butonu için href çalışacak
+                });
+            });
             
-            // Notu ekle
-            const notes = document.getElementById('order-notes').value;
-            if (notes.trim() !== '') {
-                summaryHTML += `
-                    <div class="summary-item">
-                        <span>Not:</span>
-                        <span>${notes}</span>
-                    </div>
-                `;
-            }
+            // Sayfa her değiştiğinde kaydırmayı engelle
+            window.addEventListener('resize', function() {
+                window.scrollTo(0, 0);
+            });
             
-            // Masa numarasını ekle
-            const tableNumber = document.getElementById('table-number').value;
-            if (tableNumber !== '') {
-                summaryHTML += `
-                    <div class="summary-item">
-                        <span>Masa No:</span>
-                        <span>${tableNumber}</span>
-                    </div>
-                `;
-            }
+            // Sayfa yüklendiğinde kaydırmayı sıfırla
+            window.addEventListener('load', function() {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+            });
             
-            summaryItems.innerHTML = summaryHTML;
-            document.getElementById('total-price').textContent = `${total} ₺`;
-            
-            // Tarih ve saat bilgisini güncelle
-            orderTime.textContent = `Sipariş Zamanı: ${getCurrentDateTime()}`;
-        }
-
-        // Masa numarası değiştiğinde sipariş özetini güncelle
-        document.getElementById('table-number').addEventListener('change', updateOrderSummary);
-
-        // Notlar değiştiğinde sipariş özetini güncelle
-        document.getElementById('order-notes').addEventListener('input', updateOrderSummary);
-
-        // Sipariş gönder butonuna tıklama olayını ekle
-        document.getElementById('submit-order').addEventListener('click', function() {
-            // Masa numarası kontrolü
-            const tableNumber = document.getElementById('table-number').value;
-            if (tableNumber === '') {
-                alert('Lütfen masa numaranızı seçiniz!');
-                return;
-            }
-            
-            // Sipariş bilgilerini hazırla
-            let orderMessage = "iç mekan Döner Siparişi:\n\n";
-            
-            // Masa numarasını ekle
-            orderMessage += `Masa No: ${tableNumber}\n\n`;
-            
-            // Ürünleri ekle
-            let hasItems = false;
-            for (const item in quantities) {
-                if (quantities[item] > 0) {
-                    hasItems = true;
-                    orderMessage += `${productNames[item]}: ${quantities[item]} adet - ${quantities[item] * prices[item]} ₺\n`;
-                }
-            }
-            
-            if (!hasItems) {
-                alert('Lütfen en az bir ürün seçin!');
-                return;
-            }
-            
-            // Notu ekle
-            const notes = document.getElementById('order-notes').value;
-            if (notes.trim() !== '') {
-                orderMessage += `\nNot: ${notes}\n`;
-            }
-            
-            // Toplam fiyatı ekle
-            let total = 0;
-            for (const item in quantities) {
-                total += quantities[item] * prices[item];
-            }
-            
-            // Tarih ve saat bilgisini ekle
-            orderMessage += `\nSipariş Zamanı: ${getCurrentDateTime()}`;
-            orderMessage += `\n\nToplam: ${total} ₺`;
-            
-            // WhatsApp numarası
-            const phoneNumber = "905557918718";
-            
-            // WhatsApp URL'si oluştur
-            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(orderMessage)}`;
-            
-            // WhatsApp'a yönlendir
-            window.open(whatsappURL, '_blank');
-            
-            // Sayfayı yenile
-            setTimeout(function() {
-                location.reload();
-            }, 1000);
+            // Önemli: Body'nin overflow'ını ayarla ama pointer-events'ı etkin bırak
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.height = '100%';
         });
-
-        // İlk sipariş özetini güncelle
-        updateOrderSummary();
+        
+        // Sayfa unload olurken de kaydırmayı engelle
+        window.addEventListener('beforeunload', function() {
+            window.scrollTo(0, 0);
+        });
     </script>
 </body>
 </html>
