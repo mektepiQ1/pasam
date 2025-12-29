@@ -1,0 +1,347 @@
+<!-- File: index.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paşam Döner - Ana Sayfa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8e8a0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            color: #8b4513;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: #ffd700;
+            color: #2c2c2c;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .button:hover {
+            background-color: #e6c300;
+            transform: translateY(-3px);
+        }
+        
+        .admin-button {
+            background-color: #8b4513;
+            color: white;
+        }
+        
+        .admin-button:hover {
+            background-color: #72380f;
+        }
+        
+        .notification-panel {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        
+        .notification-panel h2 {
+            color: #8b4513;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .send-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .send-button:hover {
+            background-color: #218838;
+        }
+        
+        .notification-status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .permission-status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .granted {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .denied {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .instructions {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Paşam Döner</div>
+        
+        <a href="p15.html" class="button">Ana Uygulamaya Git</a>
+        <a href="admin.html" class="button admin-button">Bildirim Yönetim Paneli</a>
+        
+        <div class="notification-panel">
+            <h2>📱 PWA Bildirim Sistemi</h2>
+            
+            <p>Bu sayfadan bildirim iznini yönetebilir ve test bildirimleri gönderebilirsiniz.</p>
+            
+            <div id="permissionStatus" class="permission-status"></div>
+            
+            <div class="instructions">
+                <h3>Bildirim Sistemi Kullanımı:</h3>
+                <ol>
+                    <li>Önce bildirim izni vermeniz gerekiyor</li>
+                    <li>"Bildirim İzni İste" butonuna tıklayın</li>
+                    <li>Tarayıcının izin isteğini kabul edin</li>
+                    <li>Test bildirimi gönderebilirsiniz</li>
+                    <li>Bildirimler uygulama kapalı olsa bile gösterilecektir</li>
+                </ol>
+            </div>
+            
+            <div class="form-group">
+                <button id="requestPermission" class="send-button">Bildirim İzni İste</button>
+            </div>
+            
+            <div class="form-group">
+                <button id="testNotification" class="send-button" style="background-color: #17a2b8;">Test Bildirimi Gönder</button>
+            </div>
+            
+            <div id="notificationResult" class="notification-status"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const permissionStatus = document.getElementById('permissionStatus');
+            const requestPermissionBtn = document.getElementById('requestPermission');
+            const testNotificationBtn = document.getElementById('testNotification');
+            const notificationResult = document.getElementById('notificationResult');
+            
+            // Bildirim izin durumunu kontrol et
+            function checkNotificationPermission() {
+                if (!('Notification' in window)) {
+                    permissionStatus.innerHTML = 'Bu tarayıcı bildirimleri desteklemiyor.';
+                    permissionStatus.className = 'permission-status error';
+                    requestPermissionBtn.disabled = true;
+                    testNotificationBtn.disabled = true;
+                    return;
+                }
+                
+                if (Notification.permission === 'granted') {
+                    permissionStatus.innerHTML = '✅ Bildirim izni verilmiş. Bildirim gönderebilirsiniz.';
+                    permissionStatus.className = 'permission-status granted';
+                    requestPermissionBtn.disabled = true;
+                    testNotificationBtn.disabled = false;
+                } else if (Notification.permission === 'denied') {
+                    permissionStatus.innerHTML = '❌ Bildirim izni reddedilmiş. Tarayıcı ayarlarından izin vermelisiniz.';
+                    permissionStatus.className = 'permission-status denied';
+                    requestPermissionBtn.disabled = true;
+                    testNotificationBtn.disabled = true;
+                } else {
+                    permissionStatus.innerHTML = '🔔 Bildirim izni henüz istenmemiş.';
+                    permissionStatus.className = 'permission-status';
+                    requestPermissionBtn.disabled = false;
+                    testNotificationBtn.disabled = true;
+                }
+            }
+            
+            // Bildirim izni iste
+            requestPermissionBtn.addEventListener('click', function() {
+                Notification.requestPermission().then(function(permission) {
+                    checkNotificationPermission();
+                    
+                    if (permission === 'granted') {
+                        showResult('Bildirim izni başarıyla verildi!', 'success');
+                        
+                        // İzin verildiğinde bir test bildirimi gönder
+                        sendTestNotification();
+                    } else {
+                        showResult('Bildirim izni verilmedi.', 'error');
+                    }
+                });
+            });
+            
+            // Test bildirimi gönder
+            testNotificationBtn.addEventListener('click', function() {
+                sendTestNotification();
+            });
+            
+            // Test bildirimi gönder fonksiyonu
+            function sendTestNotification() {
+                if (Notification.permission !== 'granted') {
+                    showResult('Önce bildirim izni vermelisiniz.', 'error');
+                    return;
+                }
+                
+                if (!('serviceWorker' in navigator)) {
+                    showResult('Service Worker bulunamadı.', 'error');
+                    return;
+                }
+                
+                // Service Worker'ı kaydet
+                navigator.serviceWorker.register('notification-sw.js').then(function(registration) {
+                    console.log('Service Worker başarıyla kaydedildi:', registration);
+                    
+                    // Bildirim gönder
+                    registration.showNotification('Paşam Döner', {
+                        body: 'Lezzetin Paşasından özel bir mesaj! Hoş geldiniz.',
+                        icon: 'sari.jpg',
+                        badge: 'sari.jpg',
+                        tag: 'test-notification',
+                        vibrate: [200, 100, 200],
+                        data: {
+                            url: window.location.href
+                        },
+                        actions: [
+                            {
+                                action: 'open',
+                                title: 'Uygulamayı Aç'
+                            },
+                            {
+                                action: 'close',
+                                title: 'Kapat'
+                            }
+                        ]
+                    });
+                    
+                    showResult('Test bildirimi başarıyla gönderildi!', 'success');
+                    
+                }).catch(function(error) {
+                    console.log('Service Worker kaydı başarısız:', error);
+                    showResult('Bildirim gönderilemedi: ' + error.message, 'error');
+                });
+            }
+            
+            // Sonuç mesajı göster
+            function showResult(message, type) {
+                notificationResult.textContent = message;
+                notificationResult.className = 'notification-status ' + type;
+                
+                // 5 saniye sonra mesajı temizle
+                setTimeout(function() {
+                    notificationResult.textContent = '';
+                    notificationResult.className = 'notification-status';
+                }, 5000);
+            }
+            
+            // Service Worker'dan gelen bildirim tıklamalarını yakala
+            navigator.serviceWorker.addEventListener('message', function(event) {
+                console.log('Service Worker mesajı:', event.data);
+                
+                if (event.data && event.data.action === 'notificationclick') {
+                    // Bildirime tıklandığında yapılacak işlem
+                    window.focus();
+                }
+            });
+            
+            // İzin durumunu başlangıçta kontrol et
+            checkNotificationPermission();
+        });
+    </script>
+</body>
+</html>
