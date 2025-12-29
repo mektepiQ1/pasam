@@ -1,0 +1,31 @@
+{
+  "name": "Paşam Döner",
+  "short_name": "Paşam Döner",
+  "description": "Lezzetin Paşası - Kadırlı Paşam Döner",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8e8a0",
+  "theme_color": "#ffd700",
+  "icons": [
+    {
+      "src": "sari.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "sari.jpg",
+      "sizes": "384x384",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "sari.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "gcm_sender_id": "103953800507"
+}
