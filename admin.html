@@ -1,0 +1,562 @@
+<!-- File: admin.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paşam Döner - Bildirim Yönetimi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ffd700;
+        }
+        
+        .header h1 {
+            color: #8b4513;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .notification-form {
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .btn-primary {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+        }
+        
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #8b4513;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        .result-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .notification-types {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .type-btn {
+            padding: 10px 20px;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .type-btn.active {
+            background-color: #ffd700;
+            color: #2c2c2c;
+            font-weight: bold;
+        }
+        
+        .type-btn:hover {
+            background-color: #ffd700;
+        }
+        
+        .history {
+            margin-top: 40px;
+        }
+        
+        .history h2 {
+            color: #8b4513;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .history-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .history-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Paşam Döner - Bildirim Yönetim Paneli</h1>
+            <p>Kullanıcılara bildirim göndermek için bu paneli kullanın</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="subscribers">0</div>
+                <div class="stat-label">Bildirim Abonesi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="sentCount">0</div>
+                <div class="stat-label">Gönderilen Bildirim</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="permissionRate">0%</div>
+                <div class="stat-label">İzin Oranı</div>
+            </div>
+        </div>
+        
+        <div class="notification-form">
+            <div class="notification-types">
+                <button class="type-btn active" data-type="promotion">🏷️ Promosyon</button>
+                <button class="type-btn" data-type="menu">🍽️ Menü Güncellemesi</button>
+                <button class="type-btn" data-type="news">📢 Haber/Duyuru</button>
+                <button class="type-btn" data-type="order">🚚 Sipariş Bildirimi</button>
+                <button class="type-btn" data-type="custom">✏️ Özel Bildirim</button>
+            </div>
+            
+            <form id="notificationForm">
+                <div class="form-group">
+                    <label for="title">Bildirim Başlığı:</label>
+                    <input type="text" id="title" value="Paşam Döner" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Bildirim Mesajı:</label>
+                    <textarea id="message" placeholder="Bildirim mesajınızı buraya yazın..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="url">Yönlendirme URL (isteğe bağlı):</label>
+                    <input type="url" id="url" placeholder="https://falanfilan.ct.ws/">
+                </div>
+                
+                <div class="form-group">
+                    <label for="icon">İkon URL:</label>
+                    <input type="url" id="icon" value="sari.jpg">
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="sendNotification">Bildirimi Gönder</button>
+                    <button type="button" class="btn btn-secondary" id="previewNotification">Ön İzleme</button>
+                    <a href="index.html" class="btn btn-back">Ana Sayfaya Dön</a>
+                </div>
+            </form>
+            
+            <div id="resultMessage" class="result-message"></div>
+        </div>
+        
+        <div class="history">
+            <h2>Son Gönderilen Bildirimler</h2>
+            <div id="historyList">
+                <div class="history-item">
+                    <div class="history-title">Hoş Geldiniz!</div>
+                    <div class="history-time">Henüz bildirim gönderilmedi</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const titleInput = document.getElementById('title');
+            const messageInput = document.getElementById('message');
+            const urlInput = document.getElementById('url');
+            const iconInput = document.getElementById('icon');
+            const sendBtn = document.getElementById('sendNotification');
+            const previewBtn = document.getElementById('previewNotification');
+            const typeButtons = document.querySelectorAll('.type-btn');
+            const resultMessage = document.getElementById('resultMessage');
+            const subscribersEl = document.getElementById('subscribers');
+            const sentCountEl = document.getElementById('sentCount');
+            const permissionRateEl = document.getElementById('permissionRate');
+            const historyList = document.getElementById('historyList');
+            
+            // Örnek mesaj şablonları
+            const messageTemplates = {
+                promotion: {
+                    title: "Paşam Döner - Özel İndirim!",
+                    message: "Bugüne özel %20 indirim fırsatını kaçırmayın! Sadece bugün geçerli.",
+                    url: "https://falanfilan.ct.ws/"
+                },
+                menu: {
+                    title: "Paşam Döner - Yeni Menü!",
+                    message: "Yaz menümüz yayında! Yeni lezzetlerimizi denemek için tıklayın.",
+                    url: "https://falanfilan.ct.ws/"
+                },
+                news: {
+                    title: "Paşam Döner'den Duyuru",
+                    message: "Yeni şubemiz açıldı! Artık Kadırlı'da hizmetinizdeyiz.",
+                    url: "https://falanfilan.ct.ws/"
+                },
+                order: {
+                    title: "Siparişiniz Hazır!",
+                    message: "Siparişiniz hazırlandı. Afiyet olsun!",
+                    url: "https://falanfilan.ct.ws/"
+                },
+                custom: {
+                    title: "Paşam Döner",
+                    message: "",
+                    url: ""
+                }
+            };
+            
+            // Tip butonlarına tıklama
+            typeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Aktif butonu değiştir
+                    typeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Şablonu uygula
+                    const type = this.dataset.type;
+                    const template = messageTemplates[type];
+                    
+                    titleInput.value = template.title;
+                    messageInput.value = template.message;
+                    urlInput.value = template.url;
+                    
+                    // Özel bildirimde mesajı temizle
+                    if (type === 'custom') {
+                        messageInput.value = '';
+                        messageInput.focus();
+                    }
+                });
+            });
+            
+            // İstatistikleri güncelle (simüle edilmiş)
+            function updateStats() {
+                // Gerçek uygulamada bu veriler sunucudan alınır
+                subscribersEl.textContent = Math.floor(Math.random() * 1000) + 500;
+                sentCountEl.textContent = Math.floor(Math.random() * 100) + 50;
+                permissionRateEl.textContent = Math.floor(Math.random() * 30) + 50 + '%';
+            }
+            
+            // Geçmişi güncelle
+            function updateHistory() {
+                const history = JSON.parse(localStorage.getItem('pasam_notifications') || '[]');
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="history-item">
+                            <div class="history-title">Hoş Geldiniz!</div>
+                            <div class="history-time">Henüz bildirim gönderilmedi</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                historyList.innerHTML = '';
+                history.slice(0, 10).forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div class="history-title">${item.title}</div>
+                        <div class="history-time">${new Date(item.time).toLocaleString('tr-TR')}</div>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            // Bildirim gönder
+            sendBtn.addEventListener('click', function() {
+                const title = titleInput.value.trim();
+                const message = messageInput.value.trim();
+                const url = urlInput.value.trim();
+                const icon = iconInput.value.trim();
+                
+                if (!title || !message) {
+                    showResult('Başlık ve mesaj alanları zorunludur.', 'error');
+                    return;
+                }
+                
+                // Bildirim verisi
+                const notificationData = {
+                    title: title,
+                    body: message,
+                    icon: icon || 'sari.jpg',
+                    url: url || 'https://falanfilan.ct.ws/',
+                    timestamp: Date.now()
+                };
+                
+                // Service Worker'ı kontrol et
+                if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                    showResult('Tarayıcınız bildirimleri desteklemiyor.', 'error');
+                    return;
+                }
+                
+                // Service Worker'ı kaydet ve bildirim gönder
+                navigator.serviceWorker.register('notification-sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker başarıyla kaydedildi');
+                        
+                        // Tüm istemcilere mesaj gönder (simülasyon)
+                        // Gerçek uygulamada burada sunucuya bildirim gönderilir
+                        
+                        // Başarı mesajı göster
+                        showResult('Bildirim başarıyla gönderildi!', 'success');
+                        
+                        // Geçmişe kaydet
+                        const history = JSON.parse(localStorage.getItem('pasam_notifications') || '[]');
+                        history.unshift({
+                            title: title,
+                            message: message,
+                            time: Date.now(),
+                            type: document.querySelector('.type-btn.active').dataset.type
+                        });
+                        
+                        // En fazla 50 kayıt sakla
+                        if (history.length > 50) {
+                            history.pop();
+                        }
+                        
+                        localStorage.setItem('pasam_notifications', JSON.stringify(history));
+                        
+                        // İstatistikleri ve geçmişi güncelle
+                        updateStats();
+                        updateHistory();
+                        
+                        // Önizleme gönder (sadece izin verilmişse)
+                        if (Notification.permission === 'granted') {
+                            registration.showNotification(title, {
+                                body: message,
+                                icon: icon || 'sari.jpg',
+                                badge: 'sari.jpg',
+                                vibrate: [200, 100, 200],
+                                data: { url: url || 'https://falanfilan.ct.ws/' }
+                            });
+                        }
+                        
+                    })
+                    .catch(function(error) {
+                        console.error('Service Worker kaydı başarısız:', error);
+                        showResult('Bildirim gönderilemedi: ' + error.message, 'error');
+                    });
+            });
+            
+            // Ön izleme göster
+            previewBtn.addEventListener('click', function() {
+                const title = titleInput.value.trim();
+                const message = messageInput.value.trim();
+                
+                if (!title || !message) {
+                    showResult('Ön izleme için başlık ve mesaj gerekli.', 'error');
+                    return;
+                }
+                
+                if (Notification.permission !== 'granted') {
+                    showResult('Ön izleme için önce bildirim izni vermelisiniz. (Ana sayfadan izin isteyebilirsiniz)', 'error');
+                    return;
+                }
+                
+                // Ön izleme bildirimi göster
+                new Notification(title, {
+                    body: message,
+                    icon: iconInput.value.trim() || 'sari.jpg',
+                    badge: 'sari.jpg'
+                });
+                
+                showResult('Ön izleme bildirimi gösterildi.', 'success');
+            });
+            
+            // Sonuç mesajı göster
+            function showResult(message, type) {
+                resultMessage.textContent = message;
+                resultMessage.className = 'result-message ' + type;
+                
+                // 5 saniye sonra mesajı temizle
+                setTimeout(function() {
+                    resultMessage.textContent = '';
+                    resultMessage.className = 'result-message';
+                }, 5000);
+            }
+            
+            // İstatistikleri ve geçmişi yükle
+            updateStats();
+            updateHistory();
+            
+            // Başlangıçta promosyon şablonunu yükle
+            titleInput.value = messageTemplates.promotion.title;
+            messageInput.value = messageTemplates.promotion.message;
+            urlInput.value = messageTemplates.promotion.url;
+            
+            // Form submit engelle
+            document.getElementById('notificationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>
