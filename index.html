@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ULTRA+ SPOR // Mobil & Profesyonel</title>
+    
+    <!-- PWA ve Mobil Kurulum Ayarları -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050507">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ULTRA+ SPOR">
+    <link rel="apple-touch-icon" href="dumbell.jpg">
+
+    <!-- Font Awesome Vektörel İkon Kütüphanesi -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            /* Saf Siyah Arka Plan */
+            --bg-dark: #000000;
+            --card-bg: #0d0e12;
+            --drawer-bg: #0a0b0e;
+            
+            /* Ultra-Ateşli Metalik Gri Paleti */
+            --metallic-main: #e2e8f0;
+            --metallic-bright: #ffffff;
+            --metallic-mid: #94a3b8;
+            --metallic-dark: #475569;
+            --metallic-glow: rgba(226, 232, 240, 0.35);
+            --metallic-border: rgba(226, 232, 240, 0.3);
+
+            --text-main: #f8fafc;
+            --text-muted: #71717a;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            background: #050507;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 0 15px rgba(226, 232, 240, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-main);
+        }
+
+        .logo span.grey { 
+            color: var(--metallic-main); 
+            text-shadow: 0 0 12px var(--metallic-glow); 
+        }
+
+        /* PWA Ana Ekrana Ekle Butonu */
+        .pwa-install-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            color: #000000;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 10px var(--metallic-glow);
+            transition: transform 0.1s;
+        }
+        .pwa-install-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Main Screen */
+        main {
+            flex: 1;
+            padding: 2rem 1rem;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .stopwatch-container {
+            background: var(--card-bg);
+            border: 1px solid var(--metallic-border);
+            border-radius: 20px;
+            padding: 2.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.95), 0 0 25px var(--metallic-glow);
+            border-top: 3px solid var(--metallic-main);
+        }
+
+        .section-title-badge {
+            position: absolute;
+            top: 1.2rem;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--metallic-mid);
+            font-weight: 800;
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: 800;
+            font-family: monospace;
+            color: var(--metallic-bright);
+            text-shadow: 0 0 25px var(--metallic-glow);
+            margin: 2rem 0;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            border: none;
+            flex: 1;
+            max-width: 140px;
+        }
+
+        .btn-start { 
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%); 
+            color: #000000; 
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8), 0 0 20px var(--metallic-glow); 
+        }
+        .btn-start:active { transform: scale(0.96); }
+
+        .btn-pause { 
+            background: transparent; 
+            border: 1px solid var(--metallic-main); 
+            color: var(--metallic-main); 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 10px rgba(226, 232, 240, 0.15);
+        }
+        .btn-pause:active { background: var(--metallic-main); color: #000; transform: scale(0.96); }
+
+        .btn-reset { 
+            background: transparent; 
+            border: 1px solid var(--metallic-dark); 
+            color: var(--text-muted); 
+            flex: 0.5; 
+            max-width: 100px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        .btn-reset:active { background: var(--metallic-dark); color: #fff; transform: scale(0.96); }
+
+        /* Action Grid */
+        .action-grid { display: flex; gap: 1rem; width: 100%; }
+        
+        .drawer-trigger-btn {
+            flex: 1; 
+            background: #0d0e12; 
+            border: 1px solid var(--metallic-border);
+            padding: 1.2rem; 
+            border-radius: 16px; 
+            font-weight: 700; 
+            font-size: 1rem;
+            color: var(--text-main); 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            gap: 10px; 
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9), 0 0 15px rgba(226, 232, 240, 0.15);
+        }
+
+        .drawer-trigger-btn.program { border-bottom: 3px solid var(--metallic-main); }
+        .drawer-trigger-btn.music { border-bottom: 3px solid var(--metallic-mid); }
+        .drawer-trigger-btn:active { background: #181920; transform: scale(0.98); }
+
+        /* Drawers Configuration */
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s; z-index: 200;
+        }
+        .drawer-overlay.open { opacity: 1; visibility: visible; }
+
+        .drawer {
+            position: fixed; top: 0; width: 400px; max-width: 85vw; height: 100vh;
+            background: var(--drawer-bg); 
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.95), 0 0 25px rgba(226, 232, 240, 0.15);
+            z-index: 201; transition: transform 0.25s ease-out;
+            display: flex; flex-direction: column;
+            will-change: transform;
+        }
+
+        .drawer-left { left: 0; transform: translateX(-100%); border-right: 1px solid var(--metallic-border); }
+        .drawer-left.open { transform: translateX(0); }
+
+        .drawer-right { right: 0; transform: translateX(100%); border-left: 1px solid var(--metallic-border); }
+        .drawer-right.open { transform: translateX(0); }
+
+        .drawer-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem; border-bottom: 1px solid var(--border-color);
+            background: #07080a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+        }
+        .drawer-header h3 { font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase; color: var(--metallic-main); font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+        .close-drawer-btn {
+            background: transparent; border: none; color: var(--text-muted); font-size: 1.4rem;
+            cursor: pointer; line-height: 1; padding: 0 0.5rem; transition: color 0.2s;
+        }
+        .close-drawer-btn:active { color: #fff; }
+
+        .drawer-content { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+        /* Program Kartları Gölgeleri */
+        .day-card {
+            background: #0f1015; border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 1rem; display: flex; flex-direction: column;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8), 0 0 10px rgba(226, 232, 240, 0.08);
+        }
+        .day-header {
+            font-weight: 800; font-size: 0.95rem; letter-spacing: 1.5px; padding-bottom: 0.8rem;
+            margin-bottom: 0.8rem; border-bottom: 1px solid var(--border-color); display: flex;
+            justify-content: space-between; align-items: center; color: var(--metallic-mid);
+        }
+        .day-card.today { 
+            border-color: var(--metallic-main); 
+            background: #13151c; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9), 0 0 15px var(--metallic-glow);
+        }
+        .day-card.today .day-header { color: var(--metallic-bright); border-bottom-color: var(--metallic-border); }
+        .day-card.today .day-header::after {
+            content: 'BUGÜN'; font-size: 0.65rem; background: rgba(226, 232, 240, 0.15);
+            padding: 2px 6px; border-radius: 4px; border: 1px solid var(--metallic-main);
+            color: var(--metallic-main); font-weight: 800;
+        }
+
+        .exercise-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .exercise-item {
+            background: #07080a; padding: 0.7rem; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;
+            border-left: 3px solid var(--metallic-main);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+        }
+        .exercise-item.done { opacity: 0.4; text-decoration: line-through; border-left-color: var(--metallic-dark); }
+        .action-btn { background: transparent; border: none; color: var(--text-main); font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+        .add-exercise-form { display: flex; gap: 6px; }
+        .add-exercise-form input {
+            flex: 1; background: #000000; border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 0.7rem; color: #fff; font-size: 0.9rem; outline: none;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
+        }
+        .add-exercise-form input:focus { border-color: var(--metallic-main); }
+        .add-exercise-form button {
+            background: rgba(226, 232, 240, 0.15); border: 1px solid var(--metallic-main);
+            color: var(--metallic-main); padding: 0 1rem; border-radius: 8px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Music Player Gölgeleri */
+        .file-input-label {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 1rem; background: rgba(226, 232, 240, 0.08);
+            border: 1px dashed var(--metallic-main); color: var(--metallic-main); text-align: center;
+            border-radius: 10px; font-weight: 700; font-size: 0.9rem; margin-bottom: 1.5rem; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+        }
+        #audioInput { display: none; }
+
+        .playlist-item {
+            padding: 0.8rem 1rem; background: #07080a; border-radius: 8px; font-size: 0.9rem;
+            margin-bottom: 6px; border: 1px solid transparent;
+            display: flex; justify-content: space-between; align-items: center; gap: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+        }
+        .playlist-item .track-name {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .playlist-item.active { 
+            border-color: var(--metallic-main); 
+            color: var(--metallic-bright); 
+            background: #13151c; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8), 0 0 10px var(--metallic-glow);
+        }
+
+        .audio-player-controls { 
+            padding: 1.5rem; border-top: 1px solid var(--border-color); background: #050507; text-align: center; 
+            box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.9);
+        }
+        .player-buttons { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem; }
+        
+        .player-btn { background: none; border: none; color: #fff; font-size: 1.3rem; cursor: pointer; }
+        
+        .player-btn.shuffle-btn { font-size: 1.1rem; opacity: 0.4; color: var(--text-muted); }
+        .player-btn.shuffle-btn.active { color: var(--metallic-bright); opacity: 1; text-shadow: 0 0 10px var(--metallic-glow); }
+        
+        .player-btn.play-btn {
+            width: 55px; height: 55px; border-radius: 50%; background: var(--metallic-main);
+            color: #000; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8), 0 0 20px var(--metallic-glow);
+        }
+
+        @media (max-width: 450px) {
+            .timer-display { font-size: 4rem; }
+            .btn { font-size: 0.85rem; padding: 1rem 0.5rem; }
+            .drawer { max-width: 90vw; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">ULTRA+ <span class="grey">SPOR</span></div>
+        <button id="pwaInstallBtn" class="pwa-install-btn">
+            <i class="fa-solid fa-download"></i> Ana Ekrana Ekle
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="stopwatch-container">
+            <span class="section-title-badge">KRONOMETRE</span>
+            <div class="timer-display" id="timerDisplay">00:00.0</div>
+            <div class="timer-controls">
+                <button class="btn btn-start" id="startBtn">BAŞLA</button>
+                <button class="btn btn-pause" id="pauseBtn">DUR</button>
+                <button class="btn btn-reset" id="resetBtn">SIFIRLA</button>
+            </div>
+        </div>
+
+        <div class="action-grid">
+            <button class="drawer-trigger-btn program" onclick="openDrawer('programDrawer')">
+                <i class="fa-solid fa-clipboard-list" style="font-size: 1.5rem;"></i> Programım
+            </button>
+            <button class="drawer-trigger-btn music" onclick="openDrawer('musicDrawer')">
+                <i class="fa-solid fa-music" style="font-size: 1.5rem;"></i> Müzikler
+            </button>
+        </div>
+    </main>
+
+    <!-- Overlay -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeAllDrawers()"></div>
+
+    <!-- 1. PROGRAM (Sol Çekmece) -->
+    <div class="drawer drawer-left" id="programDrawer">
+        <div class="drawer-header">
+            <h3><i class="fa-solid fa-clipboard-list"></i> Haftalık Program</h3>
+            <button class="close-drawer-btn" onclick="closeAllDrawers()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-content" id="daysContainer">
+            <!-- JS ile IndexedDB'den yüklenip buraya basılacak -->
+        </div>
+    </div>
+
+    <!-- 2. MÜZİK (Sağ Çekmece) -->
+    <div class="drawer drawer-right" id="musicDrawer">
+        <div class="drawer-header">
+            <h3><i class="fa-solid fa-music"></i> Müzik Çalar</h3>
+            <button class="close-drawer-btn" onclick="closeAllDrawers()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-content">
+            <label for="audioInput" class="file-input-label">
+                <i class="fa-solid fa-folder-open" style="font-size: 1.1rem;"></i> Müzik Ekle (Klasör / Dosya)
+            </label>
+            <input type="file" id="audioInput" multiple accept="audio/*">
+            <div id="playlistContainer">
+                <p style="text-align:center; color:var(--text-muted); font-size:0.9rem; margin-top:2rem;">Liste Boş</p>
+            </div>
+        </div>
+        <div class="audio-player-controls">
+            <div id="currentTrackTitle" style="font-size:0.85rem; color:var(--text-muted); white-space:nowrap; overflow:hidden;">Şarkı Seçilmedi</div>
+            <div class="player-buttons">
+                <button class="player-btn shuffle-btn" id="shuffleBtn"><i class="fa-solid fa-shuffle"></i></button>
+                <button class="player-btn" id="prevTrackBtn"><i class="fa-solid fa-backward-step"></i></button>
+                <button class="player-btn play-btn" id="playPauseBtn"><i class="fa-solid fa-play"></i></button>
+                <button class="player-btn" id="nextTrackBtn"><i class="fa-solid fa-forward-step"></i></button>
+            </div>
+            <audio id="audioPlayer"></audio>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           1. INDEXEDDB KÜTÜPHANESİ (VERİTABANI)
+           ========================================= */
+        const DB_NAME = 'NeonFitDB';
+        const DB_VERSION = 2;
+        const STORE_NAME = 'workouts';
+        const MUSIC_STORE = 'musics';
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = event => reject('IndexedDB başlatılamadı');
+                request.onsuccess = event => resolve(event.target.result);
+                request.onupgradeneeded = event => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains(MUSIC_STORE)) {
+                        db.createObjectStore(MUSIC_STORE, { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        /* --- PROGRAM VERİTABANI İŞLEMLERİ --- */
+        async function saveWorkoutDataDB(data) {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.put({ id: 'schedule', program: data });
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject('Kayıt Hatası');
+            });
+        }
+
+        async function loadWorkoutDataDB() {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get('schedule');
+                request.onsuccess = () => {
+                    resolve(request.result ? request.result.program : null);
+                };
+                request.onerror = () => reject('Yükleme Hatası');
+            });
+        }
+
+        /* --- MÜZİK VERİTABANI İŞLEMLERİ --- */
+        async function saveTrackDB(trackObj) {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([MUSIC_STORE], 'readwrite');
+                const store = transaction.objectStore(MUSIC_STORE);
+                store.put(trackObj);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject('Müzik Kayıt Hatası');
+            });
+        }
+
+        async function loadMusicDB() {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([MUSIC_STORE], 'readonly');
+                const store = transaction.objectStore(MUSIC_STORE);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject('Müzik Yükleme Hatası');
+            });
+        }
+
+        async function deleteTrackDB(id) {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([MUSIC_STORE], 'readwrite');
+                const store = transaction.objectStore(MUSIC_STORE);
+                store.delete(id);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject('Müzik Silme Hatası');
+            });
+        }
+
+        /* --- ÇEKMECE KONTROLLERİ --- */
+        function openDrawer(id) {
+            document.getElementById(id).classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('open');
+        }
+        function closeAllDrawers() {
+            document.getElementById('programDrawer').classList.remove('open');
+            document.getElementById('musicDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('open');
+        }
+
+        /* --- KRONOMETRE --- */
+        let startTime = 0, elapsedTime = 0, timerInterval = null;
+        const timerDisplay = document.getElementById('timerDisplay');
+        function formatTime(ms) {
+            const m = String(Math.floor(ms / 60000)).padStart(2, '0');
+            const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+            const ds = Math.floor((ms % 1000) / 100);
+            return `${m}:${s}.${ds}`;
+        }
+        document.getElementById('startBtn').onclick = () => {
+            if (!timerInterval) {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    timerDisplay.textContent = formatTime(elapsedTime);
+                }, 50);
+            }
+        };
+        document.getElementById('pauseBtn').onclick = () => { clearInterval(timerInterval); timerInterval = null; };
+        document.getElementById('resetBtn').onclick = () => {
+            clearInterval(timerInterval); timerInterval = null; elapsedTime = 0; timerDisplay.textContent = "00:00.0";
+        };
+
+        /* --- MÜZİK ÇALAR & KARIŞIK ÇALMA (SHUFFLE) --- */
+        let playlist = [], currentTrackIndex = -1, isShuffle = false;
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+
+        shuffleBtn.onclick = () => {
+            isShuffle = !isShuffle;
+            shuffleBtn.classList.toggle('active', isShuffle);
+        };
+
+        document.getElementById('audioInput').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('audio/') || f.name.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i));
+            if (files.length === 0) return;
+
+            const wasEmpty = (playlist.length === 0);
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const trackObj = {
+                    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    name: file.name,
+                    file: file
+                };
+                await saveTrackDB(trackObj);
+                playlist.push(trackObj);
+            }
+
+            renderPlaylist();
+
+            if (wasEmpty && playlist.length > 0) {
+                loadTrack(0);
+            }
+
+            e.target.value = '';
+        });
+
+        function renderPlaylist() {
+            const container = document.getElementById('playlistContainer');
+            container.innerHTML = '';
+
+            if (playlist.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.9rem; margin-top:2rem;">Liste Boş</p>';
+                return;
+            }
+
+            playlist.forEach((track, i) => {
+                const item = document.createElement('div');
+                item.className = `playlist-item ${i === currentTrackIndex ? 'active' : ''}`;
+
+                const trackName = document.createElement('span');
+                trackName.className = 'track-name';
+                trackName.innerHTML = `<i class="fa-solid fa-compact-disc"></i> ${track.name}`;
+                trackName.onclick = () => { loadTrack(i); audioPlayer.play(); playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; };
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'action-btn';
+                delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeTrack(i);
+                };
+
+                item.appendChild(trackName);
+                item.appendChild(delBtn);
+                container.appendChild(item);
+            });
+        }
+
+        async function removeTrack(i) {
+            const trackToRemove = playlist[i];
+            const isCurrent = (i === currentTrackIndex);
+            const wasPaused = audioPlayer.paused;
+
+            if (trackToRemove && trackToRemove.id) {
+                await deleteTrackDB(trackToRemove.id);
+            }
+
+            playlist.splice(i, 1);
+
+            if (playlist.length === 0) {
+                audioPlayer.pause();
+                audioPlayer.src = '';
+                currentTrackIndex = -1;
+                document.getElementById('currentTrackTitle').textContent = 'Şarkı Seçilmedi';
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                renderPlaylist();
+            } else if (isCurrent) {
+                if (currentTrackIndex >= playlist.length) {
+                    currentTrackIndex = 0;
+                }
+                loadTrack(currentTrackIndex);
+                if (!wasPaused) {
+                    audioPlayer.play();
+                    playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                } else {
+                    playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                }
+            } else {
+                if (i < currentTrackIndex) {
+                    currentTrackIndex--;
+                }
+                renderPlaylist();
+            }
+        }
+
+        function loadTrack(i) {
+            if (i < 0 || i >= playlist.length) return;
+            currentTrackIndex = i;
+            const track = playlist[i];
+            audioPlayer.src = URL.createObjectURL(track.file);
+            document.getElementById('currentTrackTitle').textContent = track.name;
+            renderPlaylist();
+        }
+
+        playPauseBtn.onclick = () => {
+            if (playlist.length === 0) return;
+            if (audioPlayer.paused) { 
+                audioPlayer.play(); 
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; 
+            } else { 
+                audioPlayer.pause(); 
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>'; 
+            }
+        };
+
+        function playNextTrack() {
+            if (playlist.length === 0) return;
+            let nextIdx;
+            
+            if (isShuffle && playlist.length > 1) {
+                do {
+                    nextIdx = Math.floor(Math.random() * playlist.length);
+                } while (nextIdx === currentTrackIndex);
+            } else {
+                nextIdx = (currentTrackIndex + 1) % playlist.length;
+            }
+            
+            loadTrack(nextIdx);
+            audioPlayer.play();
+            playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        }
+
+        document.getElementById('prevTrackBtn').onclick = () => {
+            if (playlist.length === 0) return;
+            loadTrack((currentTrackIndex - 1 + playlist.length) % playlist.length);
+            audioPlayer.play(); 
+            playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        };
+
+        document.getElementById('nextTrackBtn').onclick = playNextTrack;
+        audioPlayer.onended = playNextTrack;
+
+        /* --- HAFTALIK PROGRAM (INDEXEDDB) --- */
+        const DAYS = [
+            { id: 'pzt', name: 'PAZARTESİ' }, { id: 'sal', name: 'SALI' },
+            { id: 'car', name: 'ÇARŞAMBA' }, { id: 'per', name: 'PERŞEMBE' },
+            { id: 'cum', name: 'CUMA' }, { id: 'cmt', name: 'CUMARTESİ' },
+            { id: 'paz', name: 'PAZAR' }
+        ];
+
+        let workoutData = { pzt: [], sal: [], car: [], per: [], cum: [], cmt: [], paz: [] };
+
+        function getCurrentDayId() {
+            const map = ['paz', 'pzt', 'sal', 'car', 'per', 'cum', 'cmt'];
+            return map[new Date().getDay()];
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+            const today = getCurrentDayId();
+
+            DAYS.forEach(day => {
+                const exList = workoutData[day.id] || [];
+                const html = `
+                    <div class="day-card ${day.id === today ? 'today' : ''}">
+                        <div class="day-header">${day.name}</div>
+                        <ul class="exercise-list">
+                            ${exList.map((ex, i) => `
+                                <li class="exercise-item ${ex.done ? 'done' : ''}">
+                                    <span style="flex:1" onclick="toggleEx('${day.id}', ${i})">${ex.text}</span>
+                                    <button class="action-btn" onclick="delEx('${day.id}',${i})"><i class="fa-solid fa-xmark"></i></button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <form class="add-exercise-form" onsubmit="addEx(event, '${day.id}')">
+                            <input type="text" placeholder="+ Hareket Ekle..." id="input-${day.id}" required autocomplete="off">
+                            <button type="submit"><i class="fa-solid fa-plus"></i></button>
+                        </form>
+                    </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        async function initApp() {
+            try {
+                const data = await loadWorkoutDataDB();
+                if (data) {
+                    DAYS.forEach(d => { if (!data[d.id]) data[d.id] = []; });
+                    workoutData = data;
+                }
+            } catch (err) {
+                console.warn("Program DB hatası", err);
+            }
+
+            try {
+                const savedTracks = await loadMusicDB();
+                if (savedTracks && savedTracks.length > 0) {
+                    playlist = savedTracks;
+                    currentTrackIndex = 0;
+                    audioPlayer.src = URL.createObjectURL(playlist[0].file);
+                    document.getElementById('currentTrackTitle').textContent = playlist[0].name;
+                }
+            } catch (err) {
+                console.warn("Müzik DB hatası", err);
+            }
+
+            renderSchedule();
+            renderPlaylist();
+        }
+
+        window.addEx = async (e, dayId) => {
+            e.preventDefault();
+            const input = document.getElementById(`input-${dayId}`);
+            if (input.value.trim()) {
+                workoutData[dayId].push({ text: input.value.trim(), done: false });
+                await saveWorkoutDataDB(workoutData);
+                renderSchedule();
+                input.value = '';
+            }
+        };
+
+        window.toggleEx = async (dayId, idx) => {
+            workoutData[dayId][idx].done = !workoutData[dayId][idx].done;
+            await saveWorkoutDataDB(workoutData);
+            renderSchedule();
+        };
+
+        window.delEx = async (dayId, idx) => {
+            workoutData[dayId].splice(idx, 1);
+            await saveWorkoutDataDB(workoutData);
+            renderSchedule();
+        };
+
+        initApp();
+
+        /* =========================================
+           2. PWA (ANA EKRANA EKLE) MANTIĞI & SERVICE WORKER
+           ========================================= */
+        let deferredPrompt;
+        const pwaBtn = document.getElementById('pwaInstallBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBtn.style.display = 'flex';
+        });
+
+        pwaBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                pwaBtn.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker Kayıtlı:', reg.scope))
+                    .catch(err => console.log('Service Worker Hatası:', err));
+            });
+        }
+    </script>
+</body>
+</html>
